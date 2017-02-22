@@ -1,0 +1,21 @@
+@CHARSET "UTF-8";
+.systemName:after{
+	content:"X-bot";
+}
+.background_img {  
+	font-size: 1.1em;
+	padding: 10px 50px 10px 50px;
+	color: #FFFFFF; 
+	background: #000000 url(../css/images/background.jpg) no-repeat bottom right;
+	background-size:cover;
+	height: 400px;
+}
+.login_body {
+	background: #000000; 	
+}
+#contact:before{
+	content:"2016 X-bot";
+} 
+.login_body a{
+	background: #FFFFFF;   
+}

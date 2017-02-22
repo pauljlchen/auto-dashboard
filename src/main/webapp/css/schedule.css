@@ -1,0 +1,10 @@
+@CHARSET "UTF-8";
+table{
+	width:100%;
+	border:1px solid #808080;
+	background-color:  #f7f7f7;
+}
+td, th{
+	border:1px solid #808080;
+}
+ 

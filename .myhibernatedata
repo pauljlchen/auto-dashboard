@@ -1,0 +1,21 @@
+#MyEclipse Hibernate Properties
+#Sat Jun 13 17:03:40 CST 2015
+genBasicCompId=true
+sessionFactoryName=org.xbot.core.service.HibernateSessionFactory
+profile=
+daoSFId=
+jndiPath=
+detectM2M=false
+reStrategyClass=
+detectO2O=false
+springDaoFile=
+useJavaTypes=true
+keyGenerator=uuid
+genVersionTag=false
+sessionFactoryId=sessionFactory
+basePersistenceClass=
+genAnnotations=true
+reSettingsFile=
+configFile=/xbot/src/main/java/applicationContext.xml
+createConfigFile=true
+baseDaoClass=BaseHibernateDAO

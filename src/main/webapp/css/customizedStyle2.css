@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+#contact:before{
+	content:"2016-2020 青藤科技 版权所有";
+}
+.background_img {  
+	font-size: 1.1em;
+	padding: 10px 50px 10px 50px;
+	color: #000000; 
+	background: #FFFFFF url(../css/style2/images/background.jpg) no-repeat top left;
+	background-size: auto; 
+	height: 400px;
+}
+.login_body {
+	background: #FFFFFF;   
+}
+.login_body a{
+	color: black;   
+}
+
+.login_body form, .login_body h1{
+	margin-left: 600px;
+}
+.systemName:after{
+	content:"青藤软件机器人自动化云平台";
+}

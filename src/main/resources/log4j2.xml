@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<properties>  
+        <property name="LOG_HOME">c:/</property>  
+        <!-- 日志备份目录 -->  
+        <property name="BACKUP_HOME">{LOG_HOME}</property>  
+        <property name="STAT_NAME">stat</property>  
+        <property name="SERVER_NAME">global</property>  
+    </properties>
+  <Appenders>
+  	<RollingRandomAccessFile name="dashboard" fileName="c:\Xbot\dashboard.log"
+                 filePattern="c:\Xbot\dashboard-%d{yyyy-MM-dd}-%i.log.gz">
+      <PatternLayout>
+        <Pattern>%d{DEFAULT} [%t] %-5level %l - %msg%n</Pattern>
+      </PatternLayout>
+      <Policies>
+        <TimeBasedTriggeringPolicy />
+        <SizeBasedTriggeringPolicy size="10 MB"/>
+      </Policies>
+    </RollingRandomAccessFile>
+  </Appenders>
+  <Loggers>
+	<Logger name="dashboard" level="debug" additivity="false">
+       <AppenderRef ref="dashboard" />
+    </Logger>
+
+
+  </Loggers>
+</Configuration>
