@@ -306,7 +306,7 @@ public class DashboardController extends GenericController{
 		}
 		model.addObject("totalManualExecutionTime", totalManualExecutionTime);
 		model.addObject("savedTime", savedTime);
-		System.out.println("Total Saved Time:"+totalAutoExecutionTimeInMs+" | totalManualExecutionTime:"+totalManualExecutionTime);
+		//System.out.println("Total Saved Time:"+totalAutoExecutionTimeInMs+" | totalManualExecutionTime:"+totalManualExecutionTime);
 
 
 		return model;

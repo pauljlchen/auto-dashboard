@@ -51,6 +51,8 @@
                 var myChart1 = echarts.init(document.getElementById('theDashboard1'));
                 var myChart2 = echarts.init(document.getElementById('theDashboard2'));
                 var myChart3 = echarts.init(document.getElementById('theDashboard3'));
+
+
                 // 指定图表的配置项和数据
                 var option1 = {
                     title: {
@@ -139,7 +141,7 @@
                     },
                     series: [
                         {
-                            name:'Category',
+                            name:'Domain',
                             type:'pie',
                             selectedMode: 'single',
                             radius: [0, '40%'],
@@ -158,11 +160,11 @@
                                 <c:forEach var="item" items="${categoryMap.keySet()}">
                                 	{value:${categoryMap.get(item).kpiView.manualExecutionTime}, name:'${categoryMap.get(item).category}'},
 								</c:forEach>
-                                {}
+
                             ]
                         },
                         {
-                            name:'Projects',
+                            name:'Product',
                             type:'pie',
                             radius: ['50%', '65%'],
 
@@ -172,7 +174,7 @@
 									{value:${categoryMap.get(category).projects.get(project).manualExecutionTime}, name:'${project}'},
 									</c:forEach>
                                 </c:forEach>
-                                {}
+
                             ]
                         }
                     ]
@@ -242,6 +244,78 @@
                 myChart1.setOption(option1);
                 myChart2.setOption(option2);
                 myChart3.setOption(option3);
+
+
+                var app1 = -1;
+                var lastApp1 = -1;
+                var index1 = 0;
+                var lastIndex1 = 0;
+                setInterval(function(){
+                    if (app1<option1.series[index1].data.length){
+                        app1++;
+                    } else {
+                        app1 = 0;
+                        index1 = (index1 + 1) % option1.series.length;
+                    }
+                    // 取消之前高亮的图形
+                    myChart1.dispatchAction({
+                        type: 'downplay',
+                        seriesIndex: lastIndex1,
+                        dataIndex: lastApp1
+                    });
+                    // 高亮当前图形
+                    myChart1.dispatchAction({
+                        type: 'highlight',
+                        seriesIndex: index1,
+                        dataIndex: app2
+                    });
+                    // 显示 tooltip
+                    myChart1.dispatchAction({
+                        type: 'showTip',
+                        seriesIndex: index1,
+                        dataIndex: app1
+                    });
+                    lastIndex1 = index1;
+                    lastApp1 = app1	;
+
+                }, 1000);
+
+
+
+                var app2 = -1;
+                var lastApp2 = -1;
+                var index2 = 0;
+                var lastIndex2 = 0;
+
+                setInterval(function(){
+                    if (app2<option2.series[index2].data.length){
+                        app2++;
+                    } else {
+                        app2 = 0;
+                        index2 = (index2 + 1) % option2.series.length;
+                    }
+                    // 取消之前高亮的图形
+                    myChart2.dispatchAction({
+                        type: 'downplay',
+                        seriesIndex: lastIndex2,
+                        dataIndex: lastApp2
+                    });
+                    // 高亮当前图形
+                    myChart2.dispatchAction({
+                        type: 'highlight',
+                        seriesIndex: index2,
+                        dataIndex: app2
+                    });
+                    // 显示 tooltip
+                    myChart2.dispatchAction({
+                        type: 'showTip',
+                        seriesIndex: index2,
+                        dataIndex: app2
+                    });
+                    lastIndex2 = index2;
+                    lastApp2 = app2;
+
+				}, 1000);
 			</script>
 
 			<form action="/dashboards" method="POST" >
