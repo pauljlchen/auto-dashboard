@@ -12,12 +12,12 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="shortcut icon" href="css/images/xbot_small.ico" type="image/x-icon"/>
-<script src="/js/jquery-2.1.4.min.js"></script>
-<script src="/js/jquery-ui.min.js"></script>
-<script src="/js/echarts.min.js"></script>
-<script src="/js/jquery.waypoints.min.js"></script>
-<script src="/js/jquery.countup.min.js"></script>
+<link rel="shortcut icon" href="<%=path%>/css/images/xbot_small.ico" type="image/x-icon"/>
+<script src="<%=path%>/js/jquery-2.1.4.min.js"></script>
+<script src="<%=path%>/js/jquery-ui.min.js"></script>
+<script src="<%=path%>/js/echarts.min.js"></script>
+<script src="<%=path%>/js/jquery.waypoints.min.js"></script>
+<script src="<%=path%>/js/jquery.countup.min.js"></script>
 
 <title>Dashboard</title>
 	<script type="text/javascript">
@@ -37,7 +37,7 @@
 </head>
 
 <body>
-<div class="right"><div class="counter" data-counter-time="5000" data-counter-delay="50">14231</div><div class="subtitle">Total saved Minutes...</div></div>
+<div class="right"><div class="counter" data-counter-time="5000" data-counter-delay="50">${totalManualExecutionTime}</div><div class="subtitle">Total saved Minutes...</div></div>
 
 
 	<div class="left" id="theDashboard2" style="width: 600px;height:400px;"></div>
@@ -260,7 +260,7 @@
 			<option value="ToBeDeleted">ToBeDeleted</option>
 		</select>
 			<input id="search" type="submit" value="Search"/><input type="reset" value="Reset"/>
-			<div id="savedTime">${savedTime}</div><div id="totalAutoExecutionTime">${totalAutoExecutionTime}</div><div id="totalManualExecutionTime">${totalManualExecutionTime}</div>
+			<!--div id="savedTime">${savedTime}</div><div id="totalAutoExecutionTime">${totalAutoExecutionTime}</div><div id="totalManualExecutionTime">${totalManualExecutionTime}</div-->
 		</form>
 
 			<c:forEach var="item" items="${categoryMap.keySet()}">

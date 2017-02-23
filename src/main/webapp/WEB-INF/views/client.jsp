@@ -5,11 +5,17 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    String path = request.getContextPath();
+    String basePath = request.getScheme() + "://"
+            + request.getServerName() + ":" + request.getServerPort()
+            + path + "/";
+%>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>加载客户端</title>
-    <script src="../../js/jquery-2.1.4.min.js"></script>
+    <script src="<%=path%>/js/jquery-2.1.4.min.js"></script>
     <% String userId=request.getParameter("userId");%>
     <% String tokenId=request.getParameter("tokenId");%>
     <% String serverIp=request.getParameter("serverIp");%>

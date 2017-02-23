@@ -3,16 +3,21 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html "about:legacy-compat">
-
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="shortcut icon" href="/css/images/xbot_small.ico" type="image/x-icon"/>
+<link rel="shortcut icon" href="<%=path%>/css/images/xbot_small.ico" type="image/x-icon"/>
 
-<link rel="stylesheet" href="/css/hsbc.css">
-<script src="/js/jquery-2.1.4.min.js.js"></script>
-<script src="/js/jquery-ui.min.js"></script>
-<script src="/js/common.js"></script>
+<link rel="stylesheet" href="<%=path%>/css/hsbc.css">
+<script src="<%=path%>/js/jquery-2.1.4.min.js.js"></script>
+<script src="<%=path%>/js/jquery-ui.min.js"></script>
+<script src="<%=path%>/js/common.js"></script>
 <script> 
   $(function() {
   	$("#dialog").hide();

@@ -15,9 +15,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="shortcut icon" href="/css/images/xbot_small.ico" type="image/x-icon"/>
-<script src="/js/jquery-2.1.4.min.js"></script>
-<script src="/js/jquery-ui.min.js"></script>
+<link rel="shortcut icon" href="<%=path%>/css/images/xbot_small.ico" type="image/x-icon"/>
+<script src="<%=path%>/js/jquery-2.1.4.min.js"></script>
+<script src="<%=path%>/js/jquery-ui.min.js"></script>
 
 
 <title>Project Management</title>
@@ -65,9 +65,9 @@
 			</ul>
 
 			<div id="tabs-1">
+
 				<h2>Search Project</h2>
 				<form action="/projects/search" method="POST" >
-
 					<label>Project Code:</label><input type="text" name="projectCode" value="${projectCode}"/><br/>
 					<label>Project Name:</label><input type="text" name="projectName" value="${projectName}"/><br/>
 					<label>Project Category:</label><input type="text" name="projectCategory" value="${projectCategory}"/><br/>

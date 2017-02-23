@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: javax.activation:activation:unknown">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/javax/activation/activation/unknown/activation-unknown.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/javax/activation/activation/unknown/activation-unknown-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/javax/activation/activation/unknown/activation-unknown-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
