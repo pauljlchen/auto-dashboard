@@ -23,15 +23,15 @@
  </head>
 <body>
 	<nav>
-	<header id="headerclass">
-
-		<ul id="menu" style="display:none">
-			<li><a href="<%=path%>/home.html">Home</a></li>
-			<li><a href="<%=path%>/router?target=project">Product</a></li>
-			<li><a href="<%=path%>/router?target=test">Test Case</a></li>
-			<li><a href="<%=path%>/router?target=dashboard">Dashboard</a></li>
+		<span>
+		<ul id="showmenu2">
+			<li><img src="<%=path%>/css/images/HSBC.jpg"/></li><li><a href="<%=path%>/home.html">Home</a></li><li>|</li>
+			<li><a href="<%=path%>/router?target=project">Product</a></li><li>|</li>
+			<li><a href="<%=path%>/router?target=test">Test Case</a></li><li>|</li>
+			<li><a href="<%=path%>/router?target=dashboard">Dashboard</a></li><li>|</li>
 		</ul>
-	</header>
+	 </span><br/>
+
 
 	 </nav>
 	  <div class="headerBottom"></div>

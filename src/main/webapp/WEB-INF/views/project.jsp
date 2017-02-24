@@ -56,8 +56,9 @@
 </head>
 
 <body>
-
+	<jsp:include page="header.jsp" />
 	<main>
+
 		<div id="tabs">
 			<ul>
 				<li><a href="#tabs-1">Search Project</a></li>

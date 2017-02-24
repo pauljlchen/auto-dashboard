@@ -3,7 +3,7 @@ body
 {	 
 	min-width:600px;
  	font-size:small;
- 	font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif; 
+ 	font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif;
 }
 .left {
 	float: left;
@@ -184,15 +184,22 @@ nav
 }
 #showmenu2 li{ 
 	color:#c0c0c0;
-	cursor:default; 
-	float:left;
+	display:inline;
+	cursor:default;
 	list-style:none;
 	font-size:1.1em;
 	margin-left:0.2em;
 	margin-right:0.2em;
+
 }
-#showmenu2 span, #showmenu2 a{  
-	float:left; 
+#showmenu2 ul{
+	list-style:none;
+}
+
+#showmenu2 span{
+ }
+#showmenu2 a{
+
 }
 .caseSpan {
 	border:1px solid #c0c0c0;
@@ -285,8 +292,9 @@ main {
 	font-size:0.6em;
 	color:	#808080;
 }
-#showmenu2{ 
-	float: right;
+#showmenu2{
+
+
 } 
 #contact{
 	cursor:pointer;

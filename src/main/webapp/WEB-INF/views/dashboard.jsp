@@ -37,11 +37,13 @@
 </head>
 
 <body>
-<div class="right"><div class="counter" data-counter-time="5000" data-counter-delay="50">${totalManualExecutionTime}</div><div class="subtitle">Total saved Minutes...</div></div>
+<jsp:include page="header.jsp" />
+
+	<div class="right"><div class="counter" data-counter-time="5000" data-counter-delay="50">${totalManualExecutionTime}</div><div class="subtitle">Total saved Minutes...</div></div>
 
 
 	<div class="left" id="theDashboard2" style="width: 600px;height:400px;"></div>
-<div class="left" id="theDashboard1" style="width: 600px;height:400px;"></div><br/>
+	<div class="left" id="theDashboard1" style="width: 600px;height:400px;"></div><br/>
 	<div class="left" id="theDashboard3" style="width: 600px;height:400px;"></div>
 		<div class="left">
 		<main>
