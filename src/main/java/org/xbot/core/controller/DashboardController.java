@@ -245,9 +245,7 @@ public class DashboardController extends GenericController{
 			regionMap.put(curRegion, curRegionView);
 
 
-			if (cur.getTest()!=null){
-				totalManualExecutionTime += cur.getTest().getManualExecutionTime();
-			}
+
 
 		}
 		//summarize for Category and Region
