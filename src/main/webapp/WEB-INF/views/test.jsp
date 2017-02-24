@@ -63,7 +63,7 @@
 
 			<div id="tabs-1">
 				<h2>Search Test Case</h2>
-				<form action="/tests/search" method="POST" >
+				<form action="<%=path%>/tests/search" method="POST" >
 					<label>Project:</label>
 					<select name="projectId">
 						<option></option>
@@ -99,7 +99,7 @@
 			</div>
 			<div id="tabs-2">
 				<h2>Add new Test Case</h2>
-				<form id="addForm" action="/tests/add" method="POST">
+				<form id="addForm" action="<%=path%>/tests/add" method="POST">
 					<label>Project:</label><select name="projectId">
 					<c:forEach var="project" items="${projectList}">
 						<option value="${project.id}" <c:if test="${project.id == projectId}">selected</c:if>>[${project.projectCode}]${project.projectName}</option>
@@ -114,7 +114,7 @@
 		<jsp:include page="footer.jsp" />
 	</main>
 	<div id="dialog" title="Update Test" class="display: none; z-index:200;">
-		<form id="updateForm" action="/tests/update" method="POST" >
+		<form id="updateForm" action="<%=path%>/tests/update" method="POST" >
 			<label>Project:</label><input name="projectIdDisplay" readonly/><input type="hidden" name="projectId"/><br/>
 			<label>Test Case ID:</label><input name="idDisplay" readonly/><input type="hidden" name="id"/><br/>
 			<label>Test Case Name:</label><input type="text" name="name" /><br/>

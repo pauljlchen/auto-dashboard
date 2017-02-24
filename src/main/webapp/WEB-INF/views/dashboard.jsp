@@ -318,7 +318,7 @@
 				}, 1000);
 			</script>
 
-			<form action="/dashboards" method="POST" >
+			<form action="<%=path%>/dashboards" method="POST" >
 				<label>Start Date:</label><input type="text" id="startDate" name="startDate" value="${startDate}"/><br/>
 				<label>End Date:</label><input type="text" id="endDate" name="endDate" value="${endDate}"/><br/>
 			<label>Project Code:</label><input type="text" name="projectCode" value="${projectCode}"/><br/>

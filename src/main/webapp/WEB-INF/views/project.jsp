@@ -67,7 +67,7 @@
 			<div id="tabs-1">
 
 				<h2>Search Project</h2>
-				<form action="/projects/search" method="POST" >
+				<form action="<%=path%>/projects/search" method="POST" >
 					<label>Project Code:</label><input type="text" name="projectCode" value="${projectCode}"/><br/>
 					<label>Project Name:</label><input type="text" name="projectName" value="${projectName}"/><br/>
 					<label>Project Category:</label><input type="text" name="projectCategory" value="${projectCategory}"/><br/>
@@ -104,7 +104,7 @@
 			</div>
 			<div id="tabs-2">
 				<h2>Add new Project</h2>
-				<form id="addForm" action="/projects/add" method="POST">
+				<form id="addForm" action="<%=path%>/projects/add" method="POST">
 
 					<label>Project Code:</label><input type="text" name="projectCode" value="${projectCode}"/><br/>
 					<label>Region:</label><input type="text" name="region" value="${region}"/><br/>
@@ -123,7 +123,7 @@
 		<jsp:include page="footer.jsp" />
 	</main>
 	<div id="dialog" title="Update Project" class="display: none; z-index:200;">
-		<form id="updateForm" action="/projects/update" method="POST" >
+		<form id="updateForm" action="<%=path%>/projects/update" method="POST" >
 			<label>Project ID:</label><input name="id" readonly/><input type="hidden" name="projectId"/><br/>
 			<label>Region:</label><input type="text" name="region" /><br/>
 			<label>Country Code:</label><input type="text" name="country" /><br/>
