@@ -19,12 +19,17 @@ public class Project {
     private STATUS status=null;
     private String projectCode=null;
     private String projectName=null;
+    private String manager=null;
     private String leader=null;
     private String category=null;
     private String region=null;
     private String country=null;
+    private String pod=null;
+    private String testingTools=null;
+    private Integer targetTestcaseNumber = null;
     private Timestamp createdTime=null;
     private Set<Test> tests = new HashSet<Test>();
+    private Set<TeamConfidence> teamConfidence = new HashSet<>();
 
     @GenericGenerator(name = "generator", strategy = "uuid2")
     @Id
@@ -68,7 +73,7 @@ public class Project {
      * Project name
      * @return
      */
-    @Column(name = "project_name", length = 128)
+    @Column(name = "project_name", length = 256)
     public String getProjectName() {
         return projectName;
     }
@@ -77,7 +82,7 @@ public class Project {
         this.projectName = projectName;
     }
 
-    @Column(name = "leader", length = 128)
+    @Column(name = "leader", length = 256)
     public String getLeader() {
         return leader;
     }
@@ -85,6 +90,25 @@ public class Project {
     public void setLeader(String leader) {
         this.leader = leader;
     }
+
+    @Column(name = "manager", length = 256)
+    public String getManager() {
+        return manager;
+    }
+
+    public void setManager(String manager) {
+        this.manager = manager;
+    }
+
+    @Column(name = "testing_tools", length = 1024)
+    public String getTestingTools() {
+        return testingTools;
+    }
+
+    public void setTestingTools(String testingTools) {
+        this.testingTools = testingTools;
+    }
+
     @Column(name = "status", length = 16)
     @Enumerated(EnumType.STRING)
     public STATUS getStatus() {
@@ -99,7 +123,7 @@ public class Project {
      * The category of project
      * @return
      */
-    @Column(name = "category", length = 36)
+    @Column(name = "category", length = 50)
     public String getCategory() {
         return category;
     }
@@ -108,7 +132,7 @@ public class Project {
         this.category = category;
     }
 
-    @Column(name = "region", length = 20)
+    @Column(name = "region", length = 50)
     public String getRegion() {
         return region;
     }
@@ -116,7 +140,7 @@ public class Project {
     public void setRegion(String region) {
         this.region = region;
     }
-    @Column(name = "country", length = 20)
+    @Column(name = "country", length = 50)
     public String getCountry() {
         return country;
     }
@@ -134,9 +158,36 @@ public class Project {
         this.tests = tests;
     }
 
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "project")
+    public Set<TeamConfidence> getTeamConfidence() {
+        return teamConfidence;
+    }
+
+    public void setTeamConfidence(Set<TeamConfidence> teamConfidence) {
+        this.teamConfidence = teamConfidence;
+    }
+
+    @Column(name = "pod", length = 100)
+    public String getPod() {
+        return pod;
+    }
+
+    public void setPod(String pod) {
+        this.pod = pod;
+    }
+
+    @Column(name = "target_testcase_number")
+    public Integer getTargetTestcaseNumber() {
+        return targetTestcaseNumber;
+    }
+
+    public void setTargetTestcaseNumber(Integer targetTestcaseNumber) {
+        this.targetTestcaseNumber = targetTestcaseNumber;
+    }
+
     @Override
     public String toString() {
-       return "Project{" +
+        return "Project{" +
                 "id='" + id + '\'' +
                 ", status=" + status +
                 ", projectCode='" + projectCode + '\'' +
@@ -145,7 +196,10 @@ public class Project {
                 ", category='" + category + '\'' +
                 ", region='" + region + '\'' +
                 ", country='" + country + '\'' +
+                ", pod='" + pod + '\'' +
+                ", targetTestcaseNumber=" + targetTestcaseNumber +
                 ", createdTime=" + createdTime +
+
                 '}';
     }
 }

@@ -25,18 +25,14 @@
 	<nav>
 		<span>
 		<ul id="showmenu2">
-			<li><img src="<%=path%>/css/images/HSBC.jpg"/></li><li><a href="<%=path%>/home.html">Home</a></li><li>|</li>
+			<li><img src="<%=path%>/css/images/HSBC.jpg"/></li><li><a href="<%=path%>">Home</a></li><li>|</li>
 			<li><a href="<%=path%>/router?target=project">Product</a></li><li>|</li>
 			<li><a href="<%=path%>/router?target=test">Test Case</a></li><li>|</li>
+			<li><a href="<%=path%>/router?target=team_confidence">Team Confidence</a></li><li>|</li>
 			<li><a href="<%=path%>/router?target=dashboard">Dashboard</a></li><li>|</li>
 		</ul>
-	 </span><br/>
-
-
+	 </span>
 	 </nav>
-	  <div class="headerBottom"></div>
-	  <br class="clear:both"/>
-
 
 </body>
 </html>

@@ -13,6 +13,7 @@ import org.xbot.core.dao.Record;
 import org.xbot.core.dao.Test;
 import org.xbot.core.service.RecordService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -43,7 +44,8 @@ public class APIController extends GenericController{
     public ResponseEntity<?> doLoginRequest(@PathVariable String testId, @RequestParam(value="source", required=false) String source,
 											@RequestParam(value="tokenId", required=false) String tokenId,
 											@RequestParam(value="action", required=false) String action,
-											@RequestParam(value="result", required=false) String result
+											@RequestParam(value="result", required=false) String result,
+											HttpServletRequest httpRequest
 											) {
 		ParamChecker pc = new ParamChecker();
 		if (!pc.isFollowPattern(pc.UUID ,testId)){
@@ -67,6 +69,8 @@ public class APIController extends GenericController{
 			}
 			record.setSource(source);
 			record.setToken(tokenId);
+			record.setManualExecutionTime(t.getManualExecutionTime());
+			record.setIp(getIpAddr(httpRequest));
 			//create a new one
 			record.setStartTime(new Timestamp(System.currentTimeMillis()));
 			serviceRresult = recordService.save(record);

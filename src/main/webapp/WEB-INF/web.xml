@@ -41,7 +41,7 @@
     <url-pattern>*.do</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
-    <welcome-file>home.html</welcome-file>
+    <welcome-file>home.do</welcome-file>
   </welcome-file-list>
   <!--listener>
     <listener-class>org.xbot.core.system.StopServerManager</listener-class>

@@ -1,17 +1,15 @@
 package org.xbot.core.controller;
 
+import junit.framework.TestCase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.xbot.core.basement.ParamChecker;
-import org.xbot.core.bean.CategoryView;
-import org.xbot.core.bean.KPIView;
-import org.xbot.core.bean.RegionView;
-import org.xbot.core.dao.Project;
-import org.xbot.core.dao.Record;
-import org.xbot.core.dao.Test;
+import org.xbot.core.basement.ServiceResult;
+import org.xbot.core.bean.*;
+import org.xbot.core.dao.*;
 import org.xbot.core.service.RecordService;
 
 import java.sql.Timestamp;
@@ -21,7 +19,7 @@ import java.util.*;
 
 @Controller
 public class DashboardController extends GenericController{
-
+	public final static String DATE_FORMAT = "yyyy-M-d";
 
 	@Autowired
 	private RecordService recordService;
@@ -45,6 +43,9 @@ public class DashboardController extends GenericController{
 								   @RequestParam(value="projectCategory", required=false) String projectCategory,
 									 @RequestParam(value="startDate", required=false) String startDate,
 									 @RequestParam(value="endDate", required=false) String endDate,
+									 @RequestParam(value="manager", required=false) String manager,
+									 @RequestParam(value="pod", required=false) String pod,
+
 									 ModelAndView model) {
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Dashboard_View);
@@ -53,7 +54,7 @@ public class DashboardController extends GenericController{
 		Timestamp startDt = null;
 		Timestamp endDt = null;
 		//System.out.println("startDate:"+startDate+" endDate:"+endDate+"|"+pc.isNotEmpty(endDate));
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		try {
 
 			if (pc.isNotEmpty(endDate)){
@@ -74,22 +75,50 @@ public class DashboardController extends GenericController{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		Calendar startCalendar = Calendar.getInstance();
+		startCalendar.setTime(startDt);
+		Calendar endCalendar = Calendar.getInstance();
+		endCalendar.setTime(endDt);
 
+		String heatStartDate = startDate;
+		String heatEndDate = endDate;
+		if (heatStartDate==null || (heatStartDate!=null && heatStartDate.length()==0)){
+			heatStartDate = startCalendar.get(Calendar.YEAR)+"-"+(startCalendar.get(Calendar.MONTH)+1)+"-"+(startCalendar.get(Calendar.DATE)+1);
+		}
+		if (heatEndDate==null || (heatEndDate!=null && heatEndDate.length()==0)){
+			heatEndDate = endCalendar.get(Calendar.YEAR)+"-"+(endCalendar.get(Calendar.MONTH)+1)+"-"+(endCalendar.get(Calendar.DATE)+1);
+		}
 		Map<String, CategoryView> categoryMap = new HashMap<>();
 		Map<String, RegionView> regionMap = new HashMap<>();
-
+		//Testcase count map
+		Map<String, TestCaseView> testcaseCountMap = new HashMap<>();
+		// POD                     Date
+		Map<String,  LinkedHashMap<String, TeamConfidenceView>> confidenceMap = new HashMap<>();
+		List<String> dateList = new ArrayList<String>();
+		LinkedHashMap<String, TeamConfidenceView> confidenceTemplate = new LinkedHashMap<String, TeamConfidenceView>();
 		model.addObject("startDate", startDate);
 		model.addObject("endDate", endDate);
+		model.addObject("heatStartDate", heatStartDate);
+		model.addObject("heatEndDate", heatEndDate);
 		model.addObject("projectCode", projectCode);
 		model.addObject("projectName", projectName);
 		model.addObject("projectCategory", projectCategory);
+		model.addObject("manager", manager);
 		model.addObject("leader", leader);
+		model.addObject("pod", pod);
 		model.addObject("status", status);
 		model.addObject("region", region);
 		model.addObject("country", country);
 		model.addObject("activeTab", "1");
 		model.addObject("categoryMap", categoryMap);
 		model.addObject("regionMap", regionMap);
+		model.addObject("confidenceMap", confidenceMap);
+		model.addObject("testcaseCountMap", testcaseCountMap);
+
+		//init the date list for pass rate heatmap to use
+		LinkedHashMap<String, PassrateView> heatmapData = new LinkedHashMap<String, PassrateView>();
+		model.addObject("heatMap", heatmapData);
+
 //		if (country!=null && country.length()>0  && !pc.isFollowPattern(pc.COUNTRY_CODE, country)){
 //			model.addObject(RESULT, false);
 //			model.addObject(MESSAGE, "Country code should be 2 capital characters, such as HK, UK, US...");
@@ -100,12 +129,20 @@ public class DashboardController extends GenericController{
 			model.addObject(MESSAGE, "Project status is incorrect. If this keeps happening, please find system admin.");
 			return model;
 		}
+		TeamConfidence refTeamConfidence = new TeamConfidence();
 		Project p = new Project();
 		if (pc.isNotEmpty(country)){
 			p.setCountry(country);
+
 		}
 		if (pc.isNotEmpty(leader)){
 			p.setLeader(leader);
+		}
+		if (pc.isNotEmpty(pod)){
+			p.setPod(pod);
+		}
+		if (pc.isNotEmpty(manager)){
+			p.setManager(manager);
 		}
 		if (pc.isNotEmpty(projectCode)){
 			p.setProjectCode(projectCode);
@@ -113,21 +150,121 @@ public class DashboardController extends GenericController{
 		if (pc.isNotEmpty(category)){
 			p.setCategory(category);
 		}
+		//search for projects
+		ServiceResult serviceResult = recordService.searchByInstance(p, CommonDAO.OP_MODE.EQUALS);
+		List<Project> projects = new ArrayList<>();
+		if (serviceResult.getResult()){
+			projects = (List<Project>) serviceResult.getReturnObject();
+			for (Project cur : projects){
+				//try to get the tcv first
+				if (cur.getPod()!=null && cur.getPod().length()>0){
+					TestCaseView tcv = null;
+					if((tcv=testcaseCountMap.get(cur.getPod()))!=null){
+						//update existing one
+						if (cur.getTargetTestcaseNumber()!=null){
+							tcv.setTestcaseNumber(tcv.getTestcaseNumber()+cur.getTargetTestcaseNumber());
+						}
+					} else {
+						//create new one
+						tcv = new TestCaseView();
+						tcv.setPODName(cur.getPod());
+
+						tcv.setProjectName(cur.getProjectName());
+						tcv.setTestcaseNumber(cur.getTargetTestcaseNumber());
+						//init the testcaseCountMap
+					}
+					testcaseCountMap.put(cur.getPod(), tcv);
+				}
+
+			}
+		}
+
+
+
+
 		Test t = new Test();
 		t.setProject(p);
 		Record r = new Record();
 		r.setTest(t);
 		//r.setResult(Record.Result.Success);
-
+		refTeamConfidence.setProject(p);
 		List<Record> result = recordService.listRecord(r, startDt, endDt);
 		if (result == null || (result!=null && result.size()==0)){
 			return model;
 		}
-		Calendar startCalendar = Calendar.getInstance();
-		startCalendar.setTime(startDt);
-		Calendar endCalendar = Calendar.getInstance();
-		endCalendar.setTime(endDt);
 
+
+		//init the date list for team confidence use
+		Calendar curCalendar = Calendar.getInstance();
+
+		int passCount=0;
+		int executionCount=0;
+
+		List<Test> tests = recordService.listTest(t);
+		int totalTestCase=0;
+		if (tests!=null && tests.size()>0){
+			totalTestCase = tests.size();
+		}
+
+		Calendar curDateEndCalendar = Calendar.getInstance();
+
+		int[] records = null;
+		for (curCalendar.setTime(startCalendar.getTime()); !curCalendar.after(endCalendar); curCalendar.add(Calendar.DATE,1)){
+			curCalendar.set(Calendar.HOUR,0);
+			curCalendar.set(Calendar.HOUR_OF_DAY,0);
+			curCalendar.set(Calendar.MINUTE,0);
+			curCalendar.set(Calendar.SECOND,0);
+			dateList.add(curCalendar.get(Calendar.YEAR)+"-"+(curCalendar.get(Calendar.MONTH)+1)+"-"+(curCalendar.get(Calendar.DATE)+1));
+			TeamConfidenceView tc = new TeamConfidenceView();
+			tc.setScore(0d);
+			confidenceTemplate.put(curCalendar.get(Calendar.YEAR)+"-"+(curCalendar.get(Calendar.MONTH)+1)+"-"+(curCalendar.get(Calendar.DATE)+1),tc);
+
+			//for the passrate heatmapp calendar
+			PassrateView pv = new PassrateView();
+			//calculate the data
+			passCount=0;
+			executionCount=0;
+			curDateEndCalendar.setTime(curCalendar.getTime());
+			curDateEndCalendar.add(Calendar.DATE,1);
+			curDateEndCalendar.set(Calendar.HOUR_OF_DAY,0);
+			curDateEndCalendar.set(Calendar.HOUR,0);
+			curDateEndCalendar.set(Calendar.MINUTE,0);
+			curDateEndCalendar.set(Calendar.SECOND,0);
+
+//			for (Record rec: result){
+//
+//				//System.out.println("rec:"+rec+" true?"+(rec.getStartTime().after(curCalendar.getTime()) && rec.getEndTime().before(curDateEndCalendar.getTime())) );
+//				if (rec.getStartTime().after(curCalendar.getTime()) && rec.getEndTime().before(curDateEndCalendar.getTime())){
+//					passCount++;
+//					executionCount++;
+//				} else if (rec.getStartTime().after(curCalendar.getTime()) && rec.getStartTime().before(curDateEndCalendar.getTime())){
+//					//failed record
+//					executionCount++;
+//				}
+//			}
+			records = recordService.countRecords( new Timestamp(curCalendar.getTimeInMillis()), new Timestamp(curDateEndCalendar.getTimeInMillis()));
+			if (records!=null && records.length==2){
+				passCount = records[0];
+				executionCount = records[1];
+			}
+
+			if (executionCount>0 && passCount>0){
+				pv.setPassRate(passCount*100/executionCount);
+			} else {
+				pv.setPassRate(0);
+			}
+			if (totalTestCase>0 && executionCount>0){
+				pv.setExecutionRate(executionCount*100/totalTestCase);
+			} else {
+				pv.setExecutionRate(0);
+			}
+
+
+			heatmapData.put(curCalendar.get(Calendar.YEAR)+"-"+(curCalendar.get(Calendar.MONTH)+1)+"-"+(curCalendar.get(Calendar.DATE)+1),pv);
+
+		}
+		model.addObject("dateList", dateList);
+		model.addObject("heatMap", heatmapData);
 
 		long totalAutoExecutionTimeInMs = 0l;//ms, the total time
 		long totalManualExecutionTime = 0l;//minutes, the manual total time
@@ -143,8 +280,26 @@ public class DashboardController extends GenericController{
 		CategoryView curCategoryView = null;
 		RegionView curRegionView = null;
 		String curMonthStr = null;
+		//for setting the map key of Month
 		Calendar curMonthCalendar = Calendar.getInstance();
+
+
 		for (Record cur : result){
+			//calculate for the pod test case count
+			if (cur.getTest()!=null && cur.getTest().getProject()!=null && cur.getTest().getProject().getPod()!=null){
+				TestCaseView tcv = testcaseCountMap.get(cur.getTest().getProject().getPod());
+				Test curTest = tcv.getExecutedTestcases().get(cur.getTest().getId());
+				if (curTest==null){
+					//not existed in the map yet, add it
+					tcv.getExecutedTestcases().put(cur.getTest().getId(), cur.getTest());
+				}
+			}
+
+
+			//end calculating for pod test case count
+
+
+
 			curMonthStr = null;
 			//successful records
 			curCategory = cur.getTest().getProject().getCategory();
@@ -172,9 +327,9 @@ public class DashboardController extends GenericController{
 				RegionView rv = new RegionView();
 				Map<String, KPIView> monthsTemplate = new LinkedHashMap<>();
 				//init the month KPIView
-				Calendar curC = Calendar.getInstance();
-				for (curC.setTime(startCalendar.getTime()); !curC.after(endCalendar); curC.add(Calendar.MONTH,1)){
-					monthsTemplate.put(curC.get(Calendar.YEAR)+"-"+(curC.get(Calendar.MONTH)+1), new KPIView());
+				curCalendar = Calendar.getInstance();
+				for (curCalendar.setTime(startCalendar.getTime()); !curCalendar.after(endCalendar); curCalendar.add(Calendar.MONTH,1)){
+					monthsTemplate.put(curCalendar.get(Calendar.YEAR)+"-"+(curCalendar.get(Calendar.MONTH)+1), new KPIView());
 				}
 				rv.setMonths(monthsTemplate);
 				rv.setRegion(curRegion);
@@ -210,7 +365,7 @@ public class DashboardController extends GenericController{
 					if (cur.getStartTime()!=null) {
 						curMonthKpiView.setAutoExecutionTime(curMonthKpiView.getAutoExecutionTime() + (cur.getEndTime().getTime() - cur.getStartTime().getTime()) / 60000);
 					}
-					curMonthKpiView.setManualExecutionTime(curMonthKpiView.getManualExecutionTime()+cur.getTest().getManualExecutionTime());
+					curMonthKpiView.setManualExecutionTime(curMonthKpiView.getManualExecutionTime()+cur.getManualExecutionTime());
 
 					curRegionView.getMonths().put(curMonthStr, curMonthKpiView);
 
@@ -223,9 +378,9 @@ public class DashboardController extends GenericController{
 				}
 				//update manual time
 				if (cur.getTest()!=null){
-					totalManualExecutionTime += cur.getTest().getManualExecutionTime();
-					curProjectKpiView.setManualExecutionTime(curProjectKpiView.getManualExecutionTime()+cur.getTest().getManualExecutionTime());
-					curCountryKpiView.setManualExecutionTime(curCountryKpiView.getManualExecutionTime()+cur.getTest().getManualExecutionTime());
+					totalManualExecutionTime += cur.getManualExecutionTime();
+					curProjectKpiView.setManualExecutionTime(curProjectKpiView.getManualExecutionTime()+cur.getManualExecutionTime());
+					curCountryKpiView.setManualExecutionTime(curCountryKpiView.getManualExecutionTime()+cur.getManualExecutionTime());
 				}
 				//update the success test case count
 				curProjectKpiView.setSuccessTestcaseNumber(curProjectKpiView.getSuccessTestcaseNumber()+1);
@@ -248,6 +403,8 @@ public class DashboardController extends GenericController{
 
 
 		}
+
+
 		//summarize for Category and Region
 		CategoryView curC;
 		KPIView categoryKpi;
@@ -307,7 +464,58 @@ public class DashboardController extends GenericController{
 		//System.out.println("Total Saved Time:"+totalAutoExecutionTimeInMs+" | totalManualExecutionTime:"+totalManualExecutionTime);
 
 
+		//for team confidence
+		model.addObject("confidenceMap",getTeamConfident(confidenceTemplate,refTeamConfidence , confidenceMap, startDt, endDt));
+		//end for team confidence
+
+		//for passrate
+
+		//end for passrate
+
+
+
+		//test case count map
+		model.addObject("testcaseCountMap", testcaseCountMap);
+		result.clear();
+		result=null;
 		return model;
 	}
+	private Map<String,  LinkedHashMap<String, TeamConfidenceView>> getTeamConfident(LinkedHashMap<String, TeamConfidenceView> confidenceTemplate, TeamConfidence refTeamConfidence, Map<String,  LinkedHashMap<String, TeamConfidenceView>> confidenceMap, Timestamp startDt,Timestamp endDt){
+		//for team confidence
+		ServiceResult teamConfidenceResult = recordService.listTeamConfidence(refTeamConfidence, startDt, endDt);
 
+		Calendar temp = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+		LinkedHashMap<String, TeamConfidenceView> curConfidenceScoreMap;
+		TeamConfidenceView confidenceView;
+		if (teamConfidenceResult.getResult()){
+			List<TeamConfidence> confidenceList = (ArrayList<TeamConfidence>) teamConfidenceResult.getReturnObject();
+			if (confidenceList!=null && confidenceList.size()>0){
+				for (TeamConfidence cur: confidenceList){
+					if (cur.getProject()!=null && cur.getProject().getPod()!=null){
+						curConfidenceScoreMap = confidenceMap.get(cur.getProject().getPod());
+						if (curConfidenceScoreMap==null){
+							//define the new one
+
+							curConfidenceScoreMap = new LinkedHashMap<String, TeamConfidenceView> ();
+							curConfidenceScoreMap.putAll(confidenceTemplate);
+							for (String key : curConfidenceScoreMap.keySet()){
+								curConfidenceScoreMap.put(key, confidenceTemplate.get(key).clone());
+							}
+						}
+
+						confidenceView = curConfidenceScoreMap.get(sdf.format(cur.getCreatedTime()));
+						confidenceView.setScore(cur.getScore());
+
+						confidenceView.setCreatedBy(cur.getCreatedBy());
+						confidenceView.setDescription(cur.getDescription());
+						curConfidenceScoreMap.put(sdf.format(cur.getCreatedTime()), confidenceView);
+						confidenceMap.put(cur.getProject().getPod(), curConfidenceScoreMap);
+					}
+				}
+
+			}
+		}//end for team confidence
+		return confidenceMap;
+	}
 }

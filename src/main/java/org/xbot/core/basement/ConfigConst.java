@@ -7,6 +7,10 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration("configConst")
 @PropertySource(value = { "classpath:/app.properties"  })
 public class ConfigConst {
-	
+    @Value("${team_confidence_code}")
+    private String teamConfidenceCode;
 
+    public String getTeamConfidenceCode() {
+        return teamConfidenceCode;
+    }
 }

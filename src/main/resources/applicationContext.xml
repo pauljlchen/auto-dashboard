@@ -64,10 +64,11 @@
 		 
 		<property name="annotatedClasses">
 			<list>
-
 				<value>org.xbot.core.dao.Project</value>
 				<value>org.xbot.core.dao.Test</value>
 				<value>org.xbot.core.dao.Record</value>
+				<value>org.xbot.core.dao.TeamConfidence</value>
+				<value>org.xbot.core.dao.AuditLog</value>
 			</list>
 		</property>
 	</bean>

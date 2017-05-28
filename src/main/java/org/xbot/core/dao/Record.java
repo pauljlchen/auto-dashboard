@@ -26,8 +26,10 @@ public class Record {
     private Timestamp startTime;
     private Timestamp endTime;
     private Result result;
-
+    private Long manualExecutionTime;
     private String token;
+
+    private String ip;
 
     @GenericGenerator(name = "generator", strategy = "uuid2")
     @Id
@@ -118,6 +120,23 @@ public class Record {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    @Column(name = "manual_execution_time", length = 19)
+    public Long getManualExecutionTime() {
+        return manualExecutionTime;
+    }
+
+    public void setManualExecutionTime(Long manualExecutionTime) {
+        this.manualExecutionTime = manualExecutionTime;
+    }
+    @Column(name = "ip", length = 64)
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     @Override

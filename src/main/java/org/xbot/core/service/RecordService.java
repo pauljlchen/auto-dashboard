@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xbot.core.basement.ConfigConst;
 import org.xbot.core.basement.ParamChecker;
 import org.xbot.core.basement.ServiceResult;
+import org.xbot.core.bean.TeamConfidenceView;
 import org.xbot.core.dao.*;
 
 import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Date;
 
 @Service("taskService")
 public class RecordService {
@@ -57,7 +61,87 @@ public class RecordService {
 		return result;
 	}
 
+	/*
+             * This service will list all team confidence data
+             */
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+	public ServiceResult listTeamConfidence(final TeamConfidence obj, Timestamp startDate, Timestamp endDate){
+		ServiceResult result = new ServiceResult();
+		Object temp;
+		Page page = new Page();
+		page.setRecordsPerPage(10000l);
+		ParamChecker pc = new ParamChecker();
+		try{
+			Criteria c = dao.getSession().createCriteria(TeamConfidence.class,"t");
+			c.createAlias("t.project", "p");
+			c.add(Restrictions.ge("t.createdTime", startDate));
+			c.add(Restrictions.le("t.createdTime", endDate));
+			if (pc.isNotEmpty(obj.getCreatedBy())){
+				c.add(Restrictions.eq("t.createdBy", obj.getCreatedBy()));
+			}
+			if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getId())){
+				c.add(Restrictions.eq("p.id", obj.getProject().getId()));
+			}
+			if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getProjectCode())){
+				c.add(Restrictions.eq("p.projectCode", obj.getProject().getProjectCode()));
+			}
+			if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getProjectName())){
+				c.add(Restrictions.eq("p.projectName", obj.getProject().getProjectName()));
+			}
+			//search by POD
+			if (obj.getProject()!=null){
+			    Project ref = new Project();
+				if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getRegion())) {
+					ref.setRegion(obj.getProject().getRegion());
+				}
+				if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getPod())) {
+					ref.setPod(obj.getProject().getPod());
+				}
+				if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getCountry())) {
+					ref.setCountry(obj.getProject().getCountry());
+				}
+				if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getLeader())) {
+					ref.setLeader(obj.getProject().getLeader());
+				}
+				if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getManager())) {
+					ref.setManager(obj.getProject().getManager());
+				}
+				if (obj.getProject()!=null && obj.getProject().getStatus()!=null && obj.getProject().getStatus().toString().length()>0) {
+					ref.setStatus(obj.getProject().getStatus());
+				}
+				if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getCategory())) {
+					ref.setCategory(obj.getProject().getCategory());
+				}
+				ServiceResult tempResult = searchByInstance(ref, CommonDAO.OP_MODE.CASE_SENSITIVE_LIKE);
+				if (tempResult.getResult()){
+					//found project
+					List<Project> projectList = (List<Project>) tempResult.getReturnObject();
+					List<String> sb = new ArrayList<>();
+					for (Project prj:projectList){
+						 sb.add(prj.getId());
+					}
+					if (sb.size()>0){
+						c.add(Restrictions.in("p.id", sb));
+					}
+				}
+			}
+			c.addOrder(Order.desc("p.pod")).addOrder(Order.desc("t.createdTime"));
+			List<TeamConfidence> resultList = c.list();
 
+			if (resultList != null){
+				result.setResult(true);
+				result.setReturnObject(resultList);
+			} else {
+				result.setResult(false);
+			}
+		} catch (Exception e){
+			result.setResult(false);
+			result.setMessage("Error:"+e);
+			log.error("Error getting team confidence: ", e);
+			e.printStackTrace();
+		}
+		return result;
+	}
 		/*
          * This service will save the instance in database
          */
@@ -107,7 +191,7 @@ public class RecordService {
 		page.setFirstPage(1l);
 		page.setLastPage(1l);
 		page.setCurrentPage(1L);
-		page.setRecordsPerPage(10000L);
+		page.setRecordsPerPage(500L);
 		page.setRequestedPage(1l);
 
 		try{
@@ -126,6 +210,111 @@ public class RecordService {
 			log.error("Error searching for object list: ", e);
 			e.printStackTrace();
 		}
+		return result;
+	}
+
+	/*
+         * Count test by the reference model
+         */
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+	public int[] countRecords(Timestamp startTime, Timestamp endTime){
+
+		int[] result = {0,0};//0 is passed records, 1 is total executed records
+		Criteria  c = dao.getSession().createCriteria(Record.class, "r");
+		c.add(Restrictions.ge("r.startTime",startTime));
+		c.add(Restrictions.le("r.startTime",endTime));
+		c.setProjection(Projections.rowCount());
+		result[1]= ((Long) c.uniqueResult()).intValue();
+
+		c = dao.getSession().createCriteria(Record.class, "r");
+		c.add(Restrictions.ge("r.startTime",startTime));
+		c.add(Restrictions.le("r.startTime",endTime));
+		c.add(Restrictions.isNotNull("r.result"));
+		c.setProjection(Projections.rowCount());
+		result[0]= ((Long) c.uniqueResult()).intValue();
+
+		return result;
+	}
+
+	/*
+         * Count test by the reference model
+         */
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+	public List<Test> listTest(final Test obj){
+		List<Test> result = null;
+
+		try{
+
+			Criteria c = dao.getSession().createCriteria(Test.class,"t");
+			c.createAlias("t.project", "p");
+			//Criteria c = tempC2.createCriteria("Test");
+
+			//.add(Restrictions.eqProperty("r.testId","t.id"))
+			//.add(Restrictions.eqProperty("t.projectId","p.id"));
+			//for project properties
+			ParamChecker pc = new ParamChecker();
+			if (obj!=null && obj.getProject()!=null){
+				Project project = obj.getProject();
+				if (pc.isFollowPattern(pc.UUID, project.getId())){
+					c.add(Restrictions.eq("p.id", project.getId()));
+				}
+				if (pc.isNotEmpty(project.getCategory())){
+					c.add(Restrictions.eq("p.category", project.getCategory()));
+				}
+				if (pc.isNotEmpty(project.getCountry())){
+					c.add(Restrictions.eq("p.country", project.getCountry()));
+				}
+				if (pc.isNotEmpty(project.getLeader())){
+					c.add(Restrictions.eq("p.leader", project.getLeader()));
+				}
+				if (pc.isNotEmpty(project.getProjectCode())){
+					c.add(Restrictions.eq("p.projectCode", project.getProjectCode()));
+				}
+				if (pc.isNotEmpty(project.getProjectName())){
+					c.add(Restrictions.eq("p.projectName", project.getProjectName()));
+				}
+				if (pc.isNotEmpty(project.getRegion())){
+					c.add(Restrictions.eq("p.region", project.getRegion()));
+				}
+				if (project.getStatus()!=null){
+					c.add(Restrictions.eq("p.status", project.getStatus()));
+				}
+				if (project.getTargetTestcaseNumber()!=null){
+					c.add(Restrictions.eq("p.targetTestcaseNumber", project.getTargetTestcaseNumber()));
+				}
+				if (pc.isNotEmpty(project.getPod())){
+					c.add(Restrictions.eq("p.pod", project.getPod()));
+				}
+			}
+			if (obj!=null){
+				Test t = obj;
+				if (pc.isFollowPattern(pc.UUID, t.getId())){
+					c.add(Restrictions.eq("t.id", t.getId()));
+				}
+				if (pc.isNotEmpty(t.getName())){
+					c.add(Restrictions.eq("t.name", t.getName()));
+				}
+				if (pc.isNotEmpty(t.getDescription())){
+					c.add(Restrictions.eq("t.description", t.getDescription()));
+				}
+				if (t.getManualExecutionTime()!=null){
+					c.add(Restrictions.eq("t.manualExecutionTime", t.getManualExecutionTime()));
+				}
+			}
+//			c.add(Restrictions.isNull("endTime"));
+//			c.add(Restrictions.isNotNull("startTime"));
+//			c.addOrder(Order.desc("startTime"));
+			//criteria.setMaxResults(1);
+			result = c.list();
+			if (result != null && result.size()>0){
+				return result;
+			}
+		} catch (Exception e){
+			e.printStackTrace();
+			log.error("Error searching for incomplete record ", e);
+
+		}
+
 		return result;
 	}
 
@@ -162,7 +351,7 @@ public class RecordService {
 			}
 		} catch (Exception e){
 
-			log.error("Error searching for incompleted record ", e);
+			log.error("Error searching for incomplete records, ", e);
 
 		}
 		return null;
@@ -214,6 +403,12 @@ public class RecordService {
 				if (project.getStatus()!=null){
 					c.add(Restrictions.eq("p.status", project.getStatus()));
 				}
+				if (project.getTargetTestcaseNumber()!=null){
+					c.add(Restrictions.eq("p.targetTestcaseNumber", project.getTargetTestcaseNumber()));
+				}
+				if (pc.isNotEmpty(project.getPod())){
+					c.add(Restrictions.eq("p.pod", project.getPod()));
+				}
 			}
 			if (record!=null && record.getTest()!=null){
 				Test t = record.getTest();
@@ -241,7 +436,7 @@ public class RecordService {
 			}
 		} catch (Exception e){
 			e.printStackTrace();
-			log.error("Error searching for incompleted record ", e);
+			log.error("Error searching for incomplete record ", e);
 
 		}
 		return null;
@@ -284,6 +479,12 @@ public class RecordService {
 				}
 				if (pc.isNotEmpty(project.getLeader())) {
 					c.add(Restrictions.eq("p.leader", project.getLeader()));
+				}
+				if (pc.isNotEmpty(project.getPod())) {
+					c.add(Restrictions.eq("p.pod", project.getPod()));
+				}
+				if (project.getTargetTestcaseNumber()!=null) {
+					c.add(Restrictions.eq("p.targetTestcaseNumber", project.getTargetTestcaseNumber()));
 				}
 				if (pc.isNotEmpty(project.getProjectCode())) {
 					c.add(Restrictions.eq("p.projectCode", project.getProjectCode()));

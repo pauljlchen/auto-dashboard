@@ -344,27 +344,34 @@ public class CommonDAO {
 		//below logic will not handle the id and value criteria
 		for (int i = 0; i < propertyNames.length; i++) {
 			value = catMeta.getPropertyValue(model, propertyNames[i]);
+
+			//System.out.println("name:"+propertyNames[i]+" type:"+propertyTypes[i].getName());
 			//System.out.println("name=="+propertyNames[i] + ", type=="+propertyTypes[i]+" value="+value+" value==null"+(value==null));
 			if (value == null || (value instanceof Set && ((Set) value).size()==0)){
 				continue;
 			}
-
-			if (value!=null && OP_MODE.EQUALS==opMode){
-				criteria.add(Restrictions.eq(propertyNames[i], value));
-			} else if (value!=null && OP_MODE.LIKE==opMode){
-				criteria.add(Restrictions.like(propertyNames[i], "%"+value+"%"));
-			} else if (value!=null && OP_MODE.LE==opMode){
-				criteria.add(Restrictions.le(propertyNames[i], value));
-			} else if (value!=null && OP_MODE.LT==opMode){
-				criteria.add(Restrictions.lt(propertyNames[i], value));
-			} else if (value!=null && OP_MODE.GE==opMode){
-				criteria.add(Restrictions.ge(propertyNames[i], value));
-			} else if (value!=null && OP_MODE.GT==opMode){
-				criteria.add(Restrictions.gt(propertyNames[i], value));
-			} else if (value!=null && OP_MODE.NOT_EQUALS==opMode){
-				criteria.add(Restrictions.ne(propertyNames[i], value));
-			} else if (value!=null && OP_MODE.CASE_SENSITIVE_LIKE==opMode){
-				criteria.add(Restrictions.ilike(propertyNames[i], "%"+value+"%"));
+			if ("string".equals(propertyNames[i])) {
+				if (value != null && OP_MODE.EQUALS == opMode) {
+					criteria.add(Restrictions.eq(propertyNames[i], value));
+				} else if (value != null && OP_MODE.LIKE == opMode) {
+					criteria.add(Restrictions.like(propertyNames[i], "%" + value + "%"));
+				} else if (value != null && OP_MODE.LE == opMode) {
+					criteria.add(Restrictions.le(propertyNames[i], value));
+				} else if (value != null && OP_MODE.LT == opMode) {
+					criteria.add(Restrictions.lt(propertyNames[i], value));
+				} else if (value != null && OP_MODE.GE == opMode) {
+					criteria.add(Restrictions.ge(propertyNames[i], value));
+				} else if (value != null && OP_MODE.GT == opMode) {
+					criteria.add(Restrictions.gt(propertyNames[i], value));
+				} else if (value != null && OP_MODE.NOT_EQUALS == opMode) {
+					criteria.add(Restrictions.ne(propertyNames[i], value));
+				} else if (value != null && OP_MODE.CASE_SENSITIVE_LIKE == opMode) {
+					criteria.add(Restrictions.ilike(propertyNames[i], "%" + value + "%"));
+				}
+			} else {
+				if (value != null) {
+					criteria.add(Restrictions.eq(propertyNames[i], value));
+				}
 			}
 
 		}

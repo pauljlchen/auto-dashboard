@@ -26,25 +26,26 @@
 
 
     $(function(){
-        $("#dialog").hide();
-        $("#dialog").dialog({
+        $("#dialog1").hide();
+        $("#dialog1").dialog({
             autoOpen: false,
-            height : "480",
-            width : "530"
+            width: 600,
+            height:300
         });
         $("#tabs").tabs({event:"mouseover",active:${activeTab}});
 
         $(".history_div tr").click(function(){
+
 			//fill the value
            	$("#updateForm").children("input[name='id']").val($(this).children("td[class='id']").html());
             $("#updateForm").children("input[name='idDisplay']").val($(this).children("td[class='id']").html());
             $("#updateForm").children("input[name='projectId']").val($(this).children().children("input[name='projectId']").val());
-            $("#updateForm").children("input[name='projectIdDisplay']").val($(this).children().children("input[name='projectId']").val());
+            $("#updateForm").children("input[name='projectIdDisplay']").val($.trim($(this).children("td[class='projectName']").text()));
             $("#updateForm").children("input[name='name']").val($(this).children("td[class='name']").html());
             $("#updateForm").children("textarea[name='description']").html($(this).children("td[class='description']").html());
             $("#updateForm").children("input[name='manualExecutionTime']").val($(this).children("td[class='manualExecutionTime']").html());
 
-            $("#dialog").dialog("open");
+            $("#dialog1").dialog("open");
         });
 
 
@@ -64,7 +65,7 @@
 
 			<div id="tabs-1">
 				<h2>Search Test Case</h2>
-				<form action="<%=path%>/tests/search" method="POST" >
+				<form action="<%=path%>/tests/search" method="POST"  class="inputform">
 					<label>Project:</label>
 					<select name="projectId">
 						<option></option>
@@ -73,8 +74,8 @@
 						</c:forEach>
 					</select><br/>
 
-					<label>Test Case Name:</label><input type="text" name="name" value="${name}"/><br/>
-					<label>Description:</label><textarea type="text" name="description">${description}</textarea><br/>
+					<label>Test Case Name:</label><input type="text" name="name" value=""/><br/>
+					<label>Description:</label><textarea type="text" name="description"></textarea><br/>
 
 					<input id="search" type="submit" value="Search"/><input type="reset" value="Reset"/>
 				</form>
@@ -83,8 +84,7 @@
 					<tr><th>Project</th><th>Test Case ID</th><th>Test Case Name</th><th>Description</th><th>Manual Execution Time(Minutes)</th><th>Created Time</th></tr>
 				<c:forEach var="item" items="${objList}">
 					<tr>
-						<td>
-
+						<td class="projectName">
 							<c:forEach var="project" items="${projectList}">
 								<c:if test="${project.id == item.project.id}">[${project.projectCode}]${project.projectName}<input type="hidden" name="projectId" value="${project.id}"/></c:if>
 							</c:forEach>
@@ -100,7 +100,7 @@
 			</div>
 			<div id="tabs-2">
 				<h2>Add new Test Case</h2>
-				<form id="addForm" action="<%=path%>/tests/add" method="POST">
+				<form id="addForm" action="<%=path%>/tests/add" method="POST"  class="inputform">
 					<label>Project:</label><select name="projectId">
 					<c:forEach var="project" items="${projectList}">
 						<option value="${project.id}" <c:if test="${project.id == projectId}">selected</c:if>>[${project.projectCode}]${project.projectName}</option>
@@ -114,15 +114,17 @@
 			</div>
 		<jsp:include page="footer.jsp" />
 	</main>
-	<div id="dialog" title="Update Test" class="display: none; z-index:200;">
-		<form id="updateForm" action="<%=path%>/tests/update" method="POST" >
-			<label>Project:</label><input name="projectIdDisplay" readonly/><input type="hidden" name="projectId"/><br/>
-			<label>Test Case ID:</label><input name="idDisplay" readonly/><input type="hidden" name="id"/><br/>
+	<div id="dialog1" title="Update Test" class="display: none; z-index:200;">
+		<form id="updateForm" action="<%=path%>/tests/update" method="POST"  class="inputform">
+			<label>Project:</label><input  type="text"  name="projectIdDisplay" disabled="true"/> <br/>
+			<label>Test Case ID:</label><input type="text" name="idDisplay" disabled="true"/> <br/>
 			<label>Test Case Name:</label><input type="text" name="name" /><br/>
 			<label>Description:</label><textarea type="text" name="description"></textarea><br/>
 			<label>Manual Execution Time(Minutes):</label><input type="text" name="manualExecutionTime"/><br/>
 			<input type="submit" value="Update"/><input type="reset" value="Reset"/>
+			<input type="hidden" name="projectId"/><input type="hidden" name="id"/>
 		</form>
 	</div>
+
 </body>
 </html>
