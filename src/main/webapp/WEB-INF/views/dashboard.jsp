@@ -12,6 +12,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 <link rel="shortcut icon" href="<%=path%>/css/images/xbot_small.ico" type="image/x-icon"/>
 <script src="<%=path%>/js/echarts.min.js"></script>
 <script src="<%=path%>/js/jquery.waypoints.min.js"></script>
@@ -67,16 +68,17 @@
 </head>
 
 <body>
+
+<div class="right"><div class="counter" data-counter-time="5000" data-counter-delay="50">${totalManualExecutionTime}</div><div class="subtitle">Minutes saved!<button id="filter" value="Filter">Data Filter</button></div></div>
 <jsp:include page="header.jsp" />
 
-<div class="right"><div class="counter" data-counter-time="5000" data-counter-delay="50">${totalManualExecutionTime}</div><div class="subtitle">Total saved Minutes...<button id="filter" value="Filter">Filter Charts Data</button></div></div>
 
+	<div class="left" id="theDashboard2" style="width: 35%;height:45%;"></div>
+	<div class="left" id="theDashboard1" style="width: 35%;height:45%;"></div><br/>
+	<div class="left" id="theDashboard4" style="width: 35%;height:45%;"></div>
 
-	<div class="left" id="theDashboard2" style="width: 40%;height:45%;"></div>
-	<div class="left" id="theDashboard1" style="width: 40%;height:45%;"></div><br/>
-	<div class="left" id="theDashboard4" style="width: 40%;height:45%;"></div>
-	<div class="left" id="theDashboard5" style="width: 40%;height:45%;"></div><br/>
-	<div class="left" id="theDashboard3" style="width: 40%;height:45%;"></div>
+<div class="left" id="theDashboard5" style="width: 35%;height:45%;"><c:if test="${heatMap.size()==0}"><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>To enable the Execution Details report, please click "Data Filter" and check "Show Execution Details"</c:if><c:if test="${heatMap.size()>0}"><div class="left" id="theDashboard5in" style="width: 100%;height:100%;"></div></c:if></div><br/>
+	<div class="left" id="theDashboard3" style="width: 35%;height:45%;"></div>
 		<div class="left">
 		<main>
 
@@ -86,8 +88,9 @@
                 var myChart2 = echarts.init(document.getElementById('theDashboard2'));
                 var myChart3 = echarts.init(document.getElementById('theDashboard3'));
                 var myChart4 = echarts.init(document.getElementById('theDashboard4'));
-                var myChart5 = echarts.init(document.getElementById('theDashboard5'));
-
+				<c:if test="${heatMap.size()>0}">
+					var myChart5 = echarts.init(document.getElementById('theDashboard5in'));
+				</c:if>
 
                 // 指定图表的配置项和数据
                 var option1 = {
@@ -158,13 +161,13 @@
                     },
                     tooltip: {
                         trigger: 'item',
-                        formatter: "{a} <br/>{b}: {c} ({d}%)"
+                        formatter: "{a}<br/>{b}: {c} ({d}%)"
                     },
                     legend: {
                         show: 'true',
                         orient: 'vertical',
                         x: 'left',
-                        data:['直达']
+                        data:['ECHO']
                     },
                     itemStyle: {
                         emphasis: {
@@ -174,7 +177,7 @@
                     },
                     series: [
                         {
-                            name:'Domain',
+                            name:'Product',
                             type:'pie',
                             selectedMode: 'single',
                             radius: [0, '40%'],
@@ -197,14 +200,14 @@
                             ]
                         },
                         {
-                            name:'Product',
+                            name:'Product/Project',
                             type:'pie',
                             radius: ['50%', '65%'],
 
                             data:[
                                 <c:forEach var="category" items="${categoryMap.keySet()}">
 									<c:forEach var="project" items="${categoryMap.get(category).projects.keySet()}">
-									{value:${categoryMap.get(category).projects.get(project).manualExecutionTime}, name:'${project}'},
+									{value:${categoryMap.get(category).projects.get(project).manualExecutionTime}, name:'${categoryMap.get(category).projects.get(project).name}'},
 									</c:forEach>
                                 </c:forEach>
 
@@ -358,6 +361,9 @@
                 }
 
 				var option5 = {
+                    title: {
+                        text: 'Execution Details'
+                    },
                     tooltip: {
                         position: 'top'
                     },
@@ -426,7 +432,7 @@
                         coordinateSystem: 'calendar',
                         calendarIndex: 0,
                         symbolSize: function (val) {
-                            return val[1] / 10;
+                            return val[1]<100?(val[1] / 10):10;
                         },
                         data: getExecutionRateData()
                     } ]
@@ -523,18 +529,20 @@
 		<label>Start Date:</label><input type="text" id="startDate" name="startDate" value="${startDate}"/><br/>
 		<label>End Date:</label><input type="text" id="endDate" name="endDate" value="${endDate}"/><br/>
 		<label>POD:</label><input type="text" name="pod" value="${pod}"/><br/>
-		<label>Project Code:</label><input type="text" name="projectCode" value="${projectCode}"/><br/>
-		<label>Project Name:</label><input type="text" name="projectName" value="${projectName}"/><br/>
-		<label>Project Category:</label><input type="text" name="projectCategory" value="${projectCategory}"/><br/>
+		<label>Product Code:</label><input type="text" name="productCode" value="${productCode}"/><br/>
+		<label>Product Name:</label><input type="text" name="productName" value="${productName}"/><br/>
+		<label>Product Category:</label><input type="text" name="productCategory" value="${productCategory}"/><br/>
 		<label>Leader:</label><input type="text" name="leader" value="${leader}"/><br/>
 		<label>Region:</label><input type="text" name="region" value="${region}"/><br/>
 		<label>Country Code:</label><input type="text" name="country" value="${country}"/><br/>
+
 		<label>Status:</label><select type="text" name="status" value="${status}">
-		<option></option>
-		<option value="Active">Active</option>
-		<option value="Inactive">Inactive</option>
-		<option value="ToBeDeleted">ToBeDeleted</option>
-	</select><br/>
+			<option></option>
+			<option value="Active">Active</option>
+			<option value="Inactive">Inactive</option>
+			<option value="ToBeDeleted">ToBeDeleted</option>
+		</select><br/>
+		<!--label>Show Execution Details:</label><input type="checkbox" name="isShowHeat"/><br/-->
 		<label></label><input id="search" type="submit" value="Search"/><input type="reset" value="Reset"/>
 		<!--div id="savedTime">${savedTime}</div><div id="totalAutoExecutionTime">${totalAutoExecutionTime}</div><div id="totalManualExecutionTime">${totalManualExecutionTime}</div-->
 	</form>

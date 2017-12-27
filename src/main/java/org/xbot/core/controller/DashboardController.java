@@ -26,27 +26,28 @@ public class DashboardController extends GenericController{
 
 	/**
 	 * For adding the project
-	 * @param projectCode
+	 * @param productCode
 	 * @param leader
 	 * @param status
 	 * @param model
 	 * @return
 	 */
 	@RequestMapping(value = "/dashboards")
-	public ModelAndView getDashboard(@RequestParam(value="projectCode", required=false) String projectCode,
-									 @RequestParam(value="projectName", required=false) String projectName,
+	public ModelAndView getDashboard(@RequestParam(value="productCode", required=false) String productCode,
+									 @RequestParam(value="productName", required=false) String productName,
 								   @RequestParam(value="region", required=false) String region,
 								   @RequestParam(value="country", required=false) String country,
 								   @RequestParam(value="leader", required=false) String leader,
 								   @RequestParam(value="category", required=false) String category,
 								   @RequestParam(value="status", required=false) String status,
-								   @RequestParam(value="projectCategory", required=false) String projectCategory,
+								   @RequestParam(value="productCategory", required=false) String productCategory,
 									 @RequestParam(value="startDate", required=false) String startDate,
 									 @RequestParam(value="endDate", required=false) String endDate,
 									 @RequestParam(value="manager", required=false) String manager,
 									 @RequestParam(value="pod", required=false) String pod,
-
+									 @RequestParam(value="isShowHeat", required=false, defaultValue="true") Boolean isShowHeat,
 									 ModelAndView model) {
+
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Dashboard_View);
 		Calendar c = Calendar.getInstance();
@@ -80,13 +81,17 @@ public class DashboardController extends GenericController{
 		Calendar endCalendar = Calendar.getInstance();
 		endCalendar.setTime(endDt);
 
-		String heatStartDate = startDate;
-		String heatEndDate = endDate;
-		if (heatStartDate==null || (heatStartDate!=null && heatStartDate.length()==0)){
-			heatStartDate = startCalendar.get(Calendar.YEAR)+"-"+(startCalendar.get(Calendar.MONTH)+1)+"-"+(startCalendar.get(Calendar.DATE)+1);
-		}
-		if (heatEndDate==null || (heatEndDate!=null && heatEndDate.length()==0)){
-			heatEndDate = endCalendar.get(Calendar.YEAR)+"-"+(endCalendar.get(Calendar.MONTH)+1)+"-"+(endCalendar.get(Calendar.DATE)+1);
+		if (true==isShowHeat){
+			String heatStartDate = startDate;
+			String heatEndDate = endDate;
+			if (heatStartDate==null || (heatStartDate!=null && heatStartDate.length()==0)){
+				heatStartDate = startCalendar.get(Calendar.YEAR)+"-"+(startCalendar.get(Calendar.MONTH)+1)+"-"+(startCalendar.get(Calendar.DATE)+1);
+			}
+			if (heatEndDate==null || (heatEndDate!=null && heatEndDate.length()==0)){
+				heatEndDate = endCalendar.get(Calendar.YEAR)+"-"+(endCalendar.get(Calendar.MONTH)+1)+"-"+(endCalendar.get(Calendar.DATE)+1);
+			}
+			model.addObject("heatStartDate", heatStartDate);
+			model.addObject("heatEndDate", heatEndDate);
 		}
 		Map<String, CategoryView> categoryMap = new HashMap<>();
 		Map<String, RegionView> regionMap = new HashMap<>();
@@ -98,11 +103,10 @@ public class DashboardController extends GenericController{
 		LinkedHashMap<String, TeamConfidenceView> confidenceTemplate = new LinkedHashMap<String, TeamConfidenceView>();
 		model.addObject("startDate", startDate);
 		model.addObject("endDate", endDate);
-		model.addObject("heatStartDate", heatStartDate);
-		model.addObject("heatEndDate", heatEndDate);
-		model.addObject("projectCode", projectCode);
-		model.addObject("projectName", projectName);
-		model.addObject("projectCategory", projectCategory);
+
+		model.addObject("productCode", productCode);
+		model.addObject("productName", productName);
+		model.addObject("productCategory", productCategory);
 		model.addObject("manager", manager);
 		model.addObject("leader", leader);
 		model.addObject("pod", pod);
@@ -114,6 +118,7 @@ public class DashboardController extends GenericController{
 		model.addObject("regionMap", regionMap);
 		model.addObject("confidenceMap", confidenceMap);
 		model.addObject("testcaseCountMap", testcaseCountMap);
+		model.addObject("isShowHeat", isShowHeat);
 
 		//init the date list for pass rate heatmap to use
 		LinkedHashMap<String, PassrateView> heatmapData = new LinkedHashMap<String, PassrateView>();
@@ -126,14 +131,16 @@ public class DashboardController extends GenericController{
 //		} else
 		if (status!=null && status.length()>0  && !Project.STATUS.Active.toString().equals(status) && !Project.STATUS.Inactive.toString().equals(status) && !Project.STATUS.ToBeDeleted.toString().equals(status)) {
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project status is incorrect. If this keeps happening, please find system admin.");
+			model.addObject(MESSAGE, "Product status is incorrect. If this keeps happening, please find system admin.");
 			return model;
 		}
 		TeamConfidence refTeamConfidence = new TeamConfidence();
 		Project p = new Project();
 		if (pc.isNotEmpty(country)){
 			p.setCountry(country);
-
+		}
+		if (pc.isNotEmpty(region)){
+			p.setRegion(region);
 		}
 		if (pc.isNotEmpty(leader)){
 			p.setLeader(leader);
@@ -144,12 +151,19 @@ public class DashboardController extends GenericController{
 		if (pc.isNotEmpty(manager)){
 			p.setManager(manager);
 		}
-		if (pc.isNotEmpty(projectCode)){
-			p.setProjectCode(projectCode);
+		if (pc.isNotEmpty(productCode)){
+			p.setProductCode(productCode);
+		}
+		if (pc.isNotEmpty(productName)){
+			p.setProductName(productName);
 		}
 		if (pc.isNotEmpty(category)){
 			p.setCategory(category);
 		}
+		if (pc.isNotEmpty(status)){
+			p.setStatus(Project.STATUS.valueOf(status));
+		}
+		//s
 		//search for projects
 		ServiceResult serviceResult = recordService.searchByInstance(p, CommonDAO.OP_MODE.EQUALS);
 		List<Project> projects = new ArrayList<>();
@@ -169,7 +183,7 @@ public class DashboardController extends GenericController{
 						tcv = new TestCaseView();
 						tcv.setPODName(cur.getPod());
 
-						tcv.setProjectName(cur.getProjectName());
+						tcv.setProjectName(cur.getProductName());
 						tcv.setTestcaseNumber(cur.getTargetTestcaseNumber());
 						//init the testcaseCountMap
 					}
@@ -177,6 +191,9 @@ public class DashboardController extends GenericController{
 				}
 
 			}
+			projects = null;
+			serviceResult.setReturnObject(null);
+			serviceResult = null;
 		}
 
 
@@ -219,48 +236,38 @@ public class DashboardController extends GenericController{
 			tc.setScore(0d);
 			confidenceTemplate.put(curCalendar.get(Calendar.YEAR)+"-"+(curCalendar.get(Calendar.MONTH)+1)+"-"+(curCalendar.get(Calendar.DATE)+1),tc);
 
-			//for the passrate heatmapp calendar
-			PassrateView pv = new PassrateView();
-			//calculate the data
-			passCount=0;
-			executionCount=0;
-			curDateEndCalendar.setTime(curCalendar.getTime());
-			curDateEndCalendar.add(Calendar.DATE,1);
-			curDateEndCalendar.set(Calendar.HOUR_OF_DAY,0);
-			curDateEndCalendar.set(Calendar.HOUR,0);
-			curDateEndCalendar.set(Calendar.MINUTE,0);
-			curDateEndCalendar.set(Calendar.SECOND,0);
+			if (isShowHeat){
+				//for the passrate heatmapp calendar
+				PassrateView pv = new PassrateView();
+				//calculate the data
+				passCount=0;
+				executionCount=0;
+				curDateEndCalendar.setTime(curCalendar.getTime());
+				curDateEndCalendar.add(Calendar.DATE,1);
+				curDateEndCalendar.set(Calendar.HOUR_OF_DAY,0);
+				curDateEndCalendar.set(Calendar.HOUR,0);
+				curDateEndCalendar.set(Calendar.MINUTE,0);
+				curDateEndCalendar.set(Calendar.SECOND,0);
 
-//			for (Record rec: result){
-//
-//				//System.out.println("rec:"+rec+" true?"+(rec.getStartTime().after(curCalendar.getTime()) && rec.getEndTime().before(curDateEndCalendar.getTime())) );
-//				if (rec.getStartTime().after(curCalendar.getTime()) && rec.getEndTime().before(curDateEndCalendar.getTime())){
-//					passCount++;
-//					executionCount++;
-//				} else if (rec.getStartTime().after(curCalendar.getTime()) && rec.getStartTime().before(curDateEndCalendar.getTime())){
-//					//failed record
-//					executionCount++;
-//				}
-//			}
-			records = recordService.countRecords( new Timestamp(curCalendar.getTimeInMillis()), new Timestamp(curDateEndCalendar.getTimeInMillis()));
-			if (records!=null && records.length==2){
-				passCount = records[0];
-				executionCount = records[1];
+				records = recordService.countRecords(r, new Timestamp(curCalendar.getTimeInMillis()), new Timestamp(curDateEndCalendar.getTimeInMillis()));
+				if (records!=null && records.length==2){
+					passCount = records[0];
+					executionCount = records[1];
+				}
+
+				if (executionCount>0 && passCount>0){
+					pv.setPassRate(passCount*100/executionCount);
+				} else {
+					pv.setPassRate(0);
+				}
+				if (totalTestCase>0 && executionCount>0){
+					pv.setExecutionRate(executionCount*100/totalTestCase);
+				} else {
+					pv.setExecutionRate(0);
+				}
+				heatmapData.put(curCalendar.get(Calendar.YEAR)+"-"+(curCalendar.get(Calendar.MONTH)+1)+"-"+(curCalendar.get(Calendar.DATE)+1),pv);
 			}
 
-			if (executionCount>0 && passCount>0){
-				pv.setPassRate(passCount*100/executionCount);
-			} else {
-				pv.setPassRate(0);
-			}
-			if (totalTestCase>0 && executionCount>0){
-				pv.setExecutionRate(executionCount*100/totalTestCase);
-			} else {
-				pv.setExecutionRate(0);
-			}
-
-
-			heatmapData.put(curCalendar.get(Calendar.YEAR)+"-"+(curCalendar.get(Calendar.MONTH)+1)+"-"+(curCalendar.get(Calendar.DATE)+1),pv);
 
 		}
 		model.addObject("dateList", dateList);
@@ -288,10 +295,12 @@ public class DashboardController extends GenericController{
 			//calculate for the pod test case count
 			if (cur.getTest()!=null && cur.getTest().getProject()!=null && cur.getTest().getProject().getPod()!=null){
 				TestCaseView tcv = testcaseCountMap.get(cur.getTest().getProject().getPod());
-				Test curTest = tcv.getExecutedTestcases().get(cur.getTest().getId());
-				if (curTest==null){
-					//not existed in the map yet, add it
-					tcv.getExecutedTestcases().put(cur.getTest().getId(), cur.getTest());
+				if (tcv!=null) {
+					Test curTest = tcv.getExecutedTestcases().get(cur.getTest().getId());
+					if (curTest == null) {
+						//not existed in the map yet, add it
+						tcv.getExecutedTestcases().put(cur.getTest().getId(), cur.getTest());
+					}
 				}
 			}
 
@@ -303,7 +312,7 @@ public class DashboardController extends GenericController{
 			curMonthStr = null;
 			//successful records
 			curCategory = cur.getTest().getProject().getCategory();
-			curProject = cur.getTest().getProject().getProjectCode();
+			curProject = cur.getTest().getProject().getProductCode();
 			curRegion = cur.getTest().getProject().getRegion();
 			curCountry = cur.getTest().getProject().getCountry();
 			//init category container
@@ -318,6 +327,7 @@ public class DashboardController extends GenericController{
 			if (curCategoryView.getProjects().get(curProject)==null){
 				curProjectKpiView = new KPIView();
 				curCategoryView.getProjects().put(curProject, curProjectKpiView);
+				curProjectKpiView.setName(curProject+"("+cur.getTest().getProject().getProductName()+")");
 			}
 			curProjectKpiView = curCategoryView.getProjects().get(curProject);
 
@@ -505,12 +515,15 @@ public class DashboardController extends GenericController{
 						}
 
 						confidenceView = curConfidenceScoreMap.get(sdf.format(cur.getCreatedTime()));
-						confidenceView.setScore(cur.getScore());
+						if (confidenceView!=null){
+							confidenceView.setScore(cur.getScore());
 
-						confidenceView.setCreatedBy(cur.getCreatedBy());
-						confidenceView.setDescription(cur.getDescription());
-						curConfidenceScoreMap.put(sdf.format(cur.getCreatedTime()), confidenceView);
-						confidenceMap.put(cur.getProject().getPod(), curConfidenceScoreMap);
+							confidenceView.setCreatedBy(cur.getCreatedBy());
+							confidenceView.setDescription(cur.getDescription());
+							curConfidenceScoreMap.put(sdf.format(cur.getCreatedTime()), confidenceView);
+							confidenceMap.put(cur.getProject().getPod(), curConfidenceScoreMap);
+						}
+
 					}
 				}
 

@@ -37,8 +37,8 @@ public class ViewController extends GenericController{
 	@RequestMapping("/router")
 	public ModelAndView route(@RequestParam(value="target", required=false) String target, ModelAndView model) {
 
-		 if ("project".equals(target)){
-			 model.setViewName("redirect:/projects/search");
+		 if ("product".equals(target)){
+			 model.setViewName("redirect:/product/search");
 			 return model;
 		 } else if ("test".equals(target)){
 		 	model.setViewName("redirect:/tests/search");
@@ -51,6 +51,10 @@ public class ViewController extends GenericController{
 			 return model;
 		 }  else if ("team_confidence".equals(target)){
 			 model.setViewName("redirect:teamConfidence");
+			 return model;
+		 } else if ("events".equals(target)){
+
+			 model.setViewName("redirect:"+Events_View);
 			 return model;
 		 }
 		model.addObject(MESSAGE, "Incorrect page requested!");
@@ -67,23 +71,24 @@ public class ViewController extends GenericController{
 		model.setViewName("home");
 		return model;
 	}
+
 	//, )
 
 
 
 	/**
 	 * For adding the project
-	 * @param projectCode
-	 * @param projectName
+	 * @param productCode
+	 * @param productName
 	 * @param leader
 	 * @param status
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping(value = "/projects/add" /*, method= RequestMethod.POST*/)
-	public ModelAndView addProject(@RequestParam(value="projectCode", required=false) String projectCode,
-								   @RequestParam(value="projectName", required=false) String projectName,
-								   @RequestParam(value="projectCategory", required=false) String projectCategory,
+	@RequestMapping(value = "/product/add" /*, method= RequestMethod.POST*/)
+	public ModelAndView addProduct(@RequestParam(value="productCode", required=false) String productCode,
+								   @RequestParam(value="productName", required=false) String productName,
+								   @RequestParam(value="productCategory", required=false) String productCategory,
 								   @RequestParam(value="leader", required=false) String leader,
 								   @RequestParam(value="manager", required=false) String manager,
 								   @RequestParam(value="status", required=false) String status,
@@ -91,13 +96,14 @@ public class ViewController extends GenericController{
 								   @RequestParam(value="country", required=false) String country,
 								   @RequestParam(value="pod", required=false) String pod,
 								   @RequestParam(value="targetTestcaseNumber", required=false) String targetTestcaseNumber,
+								   @RequestParam(value="phaseTestcaseNumber", required=false) String phaseTestcaseNumber,
 								   @RequestParam(value="testingTools", required=false) String testingTools,
 								   ModelAndView model) {
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Project_View);
-		model.addObject("projectCode", projectCode);
-		model.addObject("projectName", projectName);
-		model.addObject("projectCategory", projectCategory);
+		model.addObject("productCode", productCode);
+		model.addObject("productName", productName);
+		model.addObject("productCategory", productCategory);
 		model.addObject("leader", leader);
 		model.addObject("manager", manager);
 		model.addObject("status", status);
@@ -105,11 +111,12 @@ public class ViewController extends GenericController{
 		model.addObject("country", country);
 		model.addObject("pod", pod);
 		model.addObject("targetTestcaseNumber", targetTestcaseNumber);
+		model.addObject("phaseTestcaseNumber", phaseTestcaseNumber);
 		model.addObject("testingTools", testingTools);
 		model.addObject("activeTab", "1");
-		if (!pc.isNotEmpty(projectCode)){
+		if (!pc.isNotEmpty(productCode)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project Code is not provided");
+			model.addObject(MESSAGE, "Product Code is not provided");
 			return model;
 		} else if (!pc.isNotEmpty(region)){
 			model.addObject(RESULT, false);
@@ -119,9 +126,9 @@ public class ViewController extends GenericController{
 			model.addObject(RESULT, false);
 			model.addObject(MESSAGE, "Country code should be 2 capital characters, such as HK, UK, US...");
 			return model;
-		} else if (!pc.isNotEmpty(projectName)){
+		} else if (!pc.isNotEmpty(productName)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project Name is not provided");
+			model.addObject(MESSAGE, "Product Name is not provided");
 			return model;
 		}  else if (!pc.isNotEmpty(manager)){
 			model.addObject(RESULT, false);
@@ -131,29 +138,29 @@ public class ViewController extends GenericController{
 			model.addObject(RESULT, false);
 			model.addObject(MESSAGE, "Leader LN is not provided");
 			return model;
-		} else if (!pc.isNotEmpty(projectCategory)){
+		} else if (!pc.isNotEmpty(productCategory)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project Category is not provided");
+			model.addObject(MESSAGE, "Product Category is not provided");
 			return model;
 		} else if (!Project.STATUS.Active.toString().equals(status) && !Project.STATUS.Inactive.toString().equals(status) && !Project.STATUS.ToBeDeleted.toString().equals(status)) {
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project status is incorrect. If this keeps happening, please find system admin.");
+			model.addObject(MESSAGE, "Product status is incorrect. If this keeps happening, please find system admin.");
 			return model;
 		}
 		Project p = new Project();
 
-		p.setProjectCode(projectCode);
-		//check if project code is unique in DB
+		p.setProductCode(productCode);
+		//check if product code is unique in DB
 		ServiceResult result = recordService.exists(p);
 		if (result.getResult()){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "The project code had been registered before. "+((Project)result.getReturnObject()));
+			model.addObject(MESSAGE, "The product code had been registered before. "+((Project)result.getReturnObject()));
 			return model;
 		}
-		p.setCategory(projectCategory);
+		p.setCategory(productCategory);
 		p.setCountry(country);
 		p.setRegion(region);
-		p.setProjectName(projectName);
+		p.setProductName(productName);
 		p.setManager(manager);
 		p.setLeader(leader);
 		p.setCreatedTime(new Timestamp(System.currentTimeMillis()));
@@ -168,16 +175,20 @@ public class ViewController extends GenericController{
 			p.setTargetTestcaseNumber(Integer.valueOf(targetTestcaseNumber));
 		} catch(Exception e){
 		}
+		try{
+			p.setPhaseTestcaseNumber(Integer.valueOf(phaseTestcaseNumber));
+		} catch(Exception e){
+		}
 		result = recordService.save(p);
  		if (result.getResult()){
-			model.addObject(MESSAGE, "Project have been created");
+			model.addObject(MESSAGE, "Product have been created");
 			model.addObject(RESULT, true);
 		} else {
 
 			if (result != null && result.getMessage()!=null && result.getMessage().length()>0){
-				model.addObject(MESSAGE, "Project creation failed. Error: "+result.getMessage());
+				model.addObject(MESSAGE, "Product creation failed. Error: "+result.getMessage());
 			} else {
-				model.addObject(MESSAGE, "Project creation failed.");
+				model.addObject(MESSAGE, "Product creation failed.");
 			}
 			model.addObject(RESULT, false);
 		}
@@ -185,12 +196,12 @@ public class ViewController extends GenericController{
 		return model;
 	}
 
-	@RequestMapping(value = "/projects/search")
-	public ModelAndView searchProject(
-			@RequestParam(value="projectId", required=false) String projectId,
-			@RequestParam(value="projectCode", required=false) String projectCode,
-			@RequestParam(value="projectName", required=false) String projectName,
-			@RequestParam(value="projectCategory", required=false) String projectCategory,
+	@RequestMapping(value = "/product/search")
+	public ModelAndView searchProduct(
+			@RequestParam(value="productId", required=false) String productId,
+			@RequestParam(value="productCode", required=false) String productCode,
+			@RequestParam(value="productName", required=false) String productName,
+			@RequestParam(value="productCategory", required=false) String productCategory,
 			@RequestParam(value="leader", required=false) String leader,
 			@RequestParam(value="manager", required=false) String manager,
 			@RequestParam(value="status", required=false) String status,
@@ -198,14 +209,15 @@ public class ViewController extends GenericController{
 			@RequestParam(value="country", required=false) String country,
 			@RequestParam(value="pod", required=false) String pod,
 			@RequestParam(value="targetTestcaseNumber", required=false) String targetTestcaseNumber,
+			@RequestParam(value="phaseTestcaseNumber", required=false) String phaseTestcaseNumber,
 			@RequestParam(value="testingTools", required=false) String testingTools,
 			ModelAndView model) {
 
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Project_View);
-		model.addObject("projectId", projectId);
-		model.addObject("projectCode", projectCode);
-		model.addObject("projectName", projectName);
+		model.addObject("productId", productId);
+		model.addObject("productCode", productCode);
+		model.addObject("productName", productName);
 		model.addObject("leader", leader);
 		model.addObject("manager", manager);
 		model.addObject("status", status);
@@ -213,24 +225,25 @@ public class ViewController extends GenericController{
 		model.addObject("country", country);
 		model.addObject("pod", pod);
 		model.addObject("targetTestcaseNumber", targetTestcaseNumber);
+		model.addObject("phaseTestcaseNumber", phaseTestcaseNumber);
 		model.addObject("testingTools", testingTools);
-		List<Project> projectList = new ArrayList<>();
-		model.addObject("projectList", projectList);
+		List<Project> productList = new ArrayList<>();
+		model.addObject("productList", productList);
 		model.addObject("activeTab", "0");
-		if (!pc.isNotEmpty(projectCode) && !pc.isNotEmpty(projectName) && !pc.isNotEmpty(leader) && !pc.isNotEmpty(manager) && !pc.isNotEmpty(projectCategory) && !pc.isNotEmpty(pod) && !pc.isNotEmpty(targetTestcaseNumber) && !pc.isNotEmpty(region) && !pc.isNotEmpty(country) && (pc.isNotEmpty(status) && !Project.STATUS.Active.toString().equals(status) && !Project.STATUS.Inactive.toString().equals(status) && !Project.STATUS.ToBeDeleted.toString().equals(status))){
+		if (!pc.isNotEmpty(productCode) && !pc.isNotEmpty(productName) && !pc.isNotEmpty(leader) && !pc.isNotEmpty(manager) && !pc.isNotEmpty(productCategory) && !pc.isNotEmpty(pod) && !pc.isNotEmpty(targetTestcaseNumber) && !pc.isNotEmpty(region) && !pc.isNotEmpty(country) && (pc.isNotEmpty(status) && !Project.STATUS.Active.toString().equals(status) && !Project.STATUS.Inactive.toString().equals(status) && !Project.STATUS.ToBeDeleted.toString().equals(status))){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Please provide information of project to search.");
+			model.addObject(MESSAGE, "Please provide information of product to search.");
 			return model;
 		}
 		if (status!=null && status.length()>0 &&  !Project.STATUS.Active.toString().equals(status) && !Project.STATUS.Inactive.toString().equals(status) && !Project.STATUS.ToBeDeleted.toString().equals(status)) {
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project status is incorrect. If this keeps happening, please find system admin.");
+			model.addObject(MESSAGE, "Product status is incorrect. If this keeps happening, please find system admin.");
 			return model;
 		}
 
 		Project reference = new Project();
-		if (pc.isNotEmpty(projectId)){
-			reference.setId(projectId);
+		if (pc.isNotEmpty(productId)){
+			reference.setId(productId);
 		}
 		if (pc.isNotEmpty(leader)){
 			reference.setLeader(leader);
@@ -238,14 +251,14 @@ public class ViewController extends GenericController{
 		if (pc.isNotEmpty(manager)){
 			reference.setManager(manager);
 		}
-		if (pc.isNotEmpty(projectCode)){
-			reference.setProjectCode(projectCode);
+		if (pc.isNotEmpty(productCode)){
+			reference.setProductCode(productCode);
 		}
-		if (pc.isNotEmpty(projectName)){
-			reference.setProjectName(projectName);
+		if (pc.isNotEmpty(productName)){
+			reference.setProductName(productName);
 		}
-		if (pc.isNotEmpty(projectCategory)){
-			reference.setCategory(projectCategory);
+		if (pc.isNotEmpty(productCategory)){
+			reference.setCategory(productCategory);
 		}
 		if (pc.isNotEmpty(region)){
 			reference.setRegion(region);
@@ -268,15 +281,18 @@ public class ViewController extends GenericController{
 			reference.setTargetTestcaseNumber(Integer.valueOf(targetTestcaseNumber));
 		} catch(Exception e){
 		}
-
+		try{
+			reference.setPhaseTestcaseNumber(Integer.valueOf(phaseTestcaseNumber));
+		} catch(Exception e){
+		}
 		ServiceResult result = recordService.searchByInstance(reference, CommonDAO.OP_MODE.LIKE);
 		if (result.getResult()){
 			//passed
-			projectList = (List<Project>) result.getReturnObject();
-			if (projectList!=null && projectList.size()==0) {
+			productList = (List<Project>) result.getReturnObject();
+			if (productList!=null && productList.size()==0) {
 				model.addObject(MESSAGE, "No result matched.");
 			}
-			model.addObject("projectList", projectList);
+			model.addObject("productList", productList);
 			model.addObject(RESULT, true);
 
 		} else {
@@ -284,59 +300,61 @@ public class ViewController extends GenericController{
 			model.addObject(RESULT, false);
 
 			if (result != null && result.getMessage()!=null && result.getMessage().length()>0){
-				model.addObject(MESSAGE, "Project list is empty. Error: "+result.getMessage());
+				model.addObject(MESSAGE, "Product list is empty. Error: "+result.getMessage());
 			} else {
-				model.addObject(MESSAGE, "Project list is empty.");
+				model.addObject(MESSAGE, "Product list is empty.");
 			}
 		}
 		return model;
 	}
 	/**
-	 * For updating the project
-	 * @param projectCode
-	 * @param projectName
+	 * For updating the product
+	 * @param productCode
+	 * @param productName
 	 * @param leader
 	 * @param status
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping(value = "/projects/update" , method= RequestMethod.POST)
-	public ModelAndView updateProject(
-			@RequestParam(value="projectId", required=false) String projectId,
-		   @RequestParam(value="projectCode", required=false) String projectCode,
-		   @RequestParam(value="projectName", required=false) String projectName,
-			@RequestParam(value="projectCategory", required=false) String projectCategory,
+	@RequestMapping(value = "/product/update" , method= RequestMethod.POST)
+	public ModelAndView updateProduct(
+			@RequestParam(value="productId", required=false) String productId,
+		   @RequestParam(value="productCode", required=false) String productCode,
+		   @RequestParam(value="productName", required=false) String productName,
+			@RequestParam(value="productCategory", required=false) String productCategory,
 		   @RequestParam(value="leader", required=false) String leader,
 			@RequestParam(value="manager", required=false) String manager,
 			@RequestParam(value="region", required=false) String region,
 			@RequestParam(value="country", required=false) String country,
 			@RequestParam(value="pod", required=false) String pod,
 			@RequestParam(value="targetTestcaseNumber", required=false) String targetTestcaseNumber,
+			@RequestParam(value="phaseTestcaseNumber", required=false) String phaseTestcaseNumber,
 			@RequestParam(value="testingTools", required=false) String testingTools,
 		   @RequestParam(value="status", required=false) String status,ModelAndView model) {
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Project_View);
-		model.addObject("projectCode", projectCode);
-		model.addObject("projectName", projectName);
+		model.addObject("productCode", productCode);
+		model.addObject("productName", productName);
 		model.addObject("leader", leader);
 		model.addObject("manager", manager);
 		model.addObject("status", status);
 		model.addObject("pod", pod);
 		model.addObject("targetTestcaseNumber", targetTestcaseNumber);
+		model.addObject("phaseTestcaseNumber", phaseTestcaseNumber);
 		model.addObject("testingTools", testingTools);
 		model.addObject("activeTab", "0");
-		if (!pc.isFollowPattern(pc.UUID, projectId)){
+		if (!pc.isFollowPattern(pc.UUID, productId)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project ID is not provided or not following format.");
+			model.addObject(MESSAGE, "Product ID is not provided or not following format.");
 			return model;
-		} else if (!pc.isNotEmpty(projectCode)){
+		} else if (!pc.isNotEmpty(productCode)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project Code is not provided");
+			model.addObject(MESSAGE, "Product Code is not provided");
 			return model;
-		} else if (!pc.isNotEmpty(projectName)){
+		} else if (!pc.isNotEmpty(productName)){
 
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project Name is not provided");
+			model.addObject(MESSAGE, "Product Name is not provided");
 			return model;
 		} else if (!pc.isNotEmpty(leader)){
 			model.addObject(RESULT, false);
@@ -348,26 +366,26 @@ public class ViewController extends GenericController{
 			return model;
 		} else if (!pc.isNotEmpty(status) && (!Project.STATUS.Active.toString().equals(status) && !Project.STATUS.Inactive.toString().equals(status) && !Project.STATUS.ToBeDeleted.toString().equals(status))) {
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project status is incorrect. If this keeps happening, please find system admin.");
+			model.addObject(MESSAGE, "Product status is incorrect. If this keeps happening, please find system admin.");
 			return model;
-		} else if (!pc.isNotEmpty(projectCategory)){
+		} else if (!pc.isNotEmpty(productCategory)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project category is not provided. It should describe the main technology of this project.");
+			model.addObject(MESSAGE, "Product category is not provided. It should describe the main technology of this product.");
 			return model;
 		}
 		Project p = new Project();
 
 
-		//check if project code is unique in DB
-		p = recordService.getById(Project.class, projectId);
+		//check if product code is unique in DB
+		p = recordService.getById(Project.class, productId);
 		if (p == null){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "The project code had not been registered before.");
+			model.addObject(MESSAGE, "The product code had not been registered before.");
 			return model;
 		}
-		p.setProjectName(projectName);
-		p.setProjectCode(projectCode);
-		p.setCategory(projectCategory);
+		p.setProductName(productName);
+		p.setProductCode(productCode);
+		p.setCategory(productCategory);
 		p.setCountry(country);
 		p.setRegion(region);
 		p.setLeader(leader);
@@ -380,18 +398,22 @@ public class ViewController extends GenericController{
 			p.setTargetTestcaseNumber(Integer.valueOf(targetTestcaseNumber));
 		} catch(Exception e){
 		}
+		try{
+			p.setPhaseTestcaseNumber(Integer.valueOf(phaseTestcaseNumber));
+		} catch(Exception e){
+		}
 		p.setCreatedTime(new Timestamp(System.currentTimeMillis()));
 		p.setStatus(Project.STATUS.valueOf(status));
 		ServiceResult result = recordService.update(p);
 		if (result.getResult()){
-			model.addObject(MESSAGE, "Project have been updated");
+			model.addObject(MESSAGE, "Product have been updated");
 			model.addObject(RESULT, true);
 		} else {
-			model.addObject(MESSAGE, "Project creation failed. Error: "+ result.getMessage());
+			model.addObject(MESSAGE, "Product creation failed. Error: "+ result.getMessage());
 			if (result != null && result.getMessage()!=null && result.getMessage().length()>0){
-				model.addObject(MESSAGE, "Project creation failed. Error: "+result.getMessage());
+				model.addObject(MESSAGE, "Product creation failed. Error: "+result.getMessage());
 			} else {
-				model.addObject(MESSAGE, "Project creation failed.");
+				model.addObject(MESSAGE, "Product creation failed.");
 			}
 			model.addObject(RESULT, false);
 		}
@@ -410,25 +432,25 @@ public class ViewController extends GenericController{
 	public ModelAndView addTest(@RequestParam(value="name", required=false) String name,
 								   @RequestParam(value="description", required=false) String description,
 								   @RequestParam(value="manualExecutionTime", required=false) String manualExecutionTime,
-								   @RequestParam(value="projectId", required=false) String projectId,
+								   @RequestParam(value="productId", required=false) String productId,
 								   ModelAndView model) {
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Test_View);
 		model.addObject("name", name);
 		model.addObject("description", description);
 		model.addObject("manualExecutionTime", manualExecutionTime);
-		model.addObject("projectId", projectId);
+		model.addObject("productId", productId);
 		model.addObject("activeTab", "1");
 		Project p = new Project();
 		p.setStatus(Project.STATUS.Active);
 		ServiceResult result = recordService.searchByInstance(p, CommonDAO.OP_MODE.EQUALS);
-		List<Project> projectList;
+		List<Project> productList;
 		if (result.getResult()){
-			projectList = (List<Project>) result.getReturnObject();
+			productList = (List<Project>) result.getReturnObject();
 		} else {
-			projectList = new ArrayList<>();
+			productList = new ArrayList<>();
 		}
-		model.addObject("projectList", projectList);
+		model.addObject("productList", productList);
 		if (!pc.isNotEmpty(name)){
 			model.addObject(RESULT, false);
 			model.addObject(MESSAGE, "Test Name is not provided");
@@ -437,16 +459,16 @@ public class ViewController extends GenericController{
 			model.addObject(RESULT, false);
 			model.addObject(MESSAGE, "Estimated manual execution time of this test case is not provided.");
 			return model;
-		} else if (!pc.isNotEmpty(projectId)){
+		} else if (!pc.isNotEmpty(productId)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project is not provided");
+			model.addObject(MESSAGE, "Product is not provided");
 			return model;
 		}
-		Project objProject = recordService.getById(Project.class, projectId);
+		Project objProject = recordService.getById(Project.class, productId);
 		Test obj = new Test();
 		obj.setName(name);
 		obj.setProject(objProject);
-		//check if test.name of same project is defined in DB
+		//check if test.name of same product is defined in DB
 		result = recordService.exists(obj);
 		if (result.getResult()){
 			model.addObject(RESULT, false);
@@ -486,12 +508,12 @@ public class ViewController extends GenericController{
 	}
 
 	@RequestMapping(value = "/tests/search")
-	public ModelAndView searchProject(
+	public ModelAndView searchProduct(
 			@RequestParam(value="id", required=false) String id,
 			@RequestParam(value="name", required=false) String name,
 			@RequestParam(value="description", required=false) String description,
 			@RequestParam(value="manualExecutionTime", required=false) String manualExecutionTime,
-			@RequestParam(value="projectId", required=false) String projectId, ModelAndView model) {
+			@RequestParam(value="productId", required=false) String productId, ModelAndView model) {
 
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Test_View);
@@ -499,24 +521,24 @@ public class ViewController extends GenericController{
 		model.addObject("name", name);
 		model.addObject("description", description);
 		model.addObject("manualExecutionTime", manualExecutionTime);
-		model.addObject("projectId", projectId);
+		model.addObject("productId", productId);
 		model.addObject("activeTab", "1");
 		List<Test> objList = new ArrayList<>();
 		model.addObject("objList", objList);
 		Project p = new Project();
 		p.setStatus(Project.STATUS.Active);
 		ServiceResult result = recordService.searchByInstance(p, CommonDAO.OP_MODE.EQUALS);
-		List<Project> projectList;
+		List<Project> productList;
 		if (result.getResult()){
-			projectList = (List<Project>) result.getReturnObject();
+			productList = (List<Project>) result.getReturnObject();
 		} else {
-			projectList = new ArrayList<>();
+			productList = new ArrayList<>();
 		}
-		model.addObject("projectList", projectList);
+		model.addObject("productList", productList);
 		model.addObject("activeTab", "0");
-		if (!pc.isNotEmpty(id) && !pc.isNotEmpty(name) && !pc.isNotEmpty(description) && !pc.isNotEmpty(manualExecutionTime)  && !pc.isNotEmpty(projectId)){
+		if (!pc.isNotEmpty(id) && !pc.isNotEmpty(name) && !pc.isNotEmpty(description) && !pc.isNotEmpty(manualExecutionTime)  && !pc.isNotEmpty(productId)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Please provide information of project to search.");
+			model.addObject(MESSAGE, "Please provide information of product to search.");
 			return model;
 		}
 
@@ -542,9 +564,9 @@ public class ViewController extends GenericController{
 			}
 		}
 		Project objProject=null;
-		if (pc.isNotEmpty(projectId)){
-			objProject = recordService.getById(Project.class, projectId);
-			//System.out.println(objProject+" | "+projectId);
+		if (pc.isNotEmpty(productId)){
+			objProject = recordService.getById(Project.class, productId);
+			//System.out.println(objProject+" | "+productId);
 			obj.setProject(objProject);
 		} else {
 			obj.setProject(null);
@@ -578,7 +600,7 @@ public class ViewController extends GenericController{
 	 * @param name
 	 * @param description
 	 * @param manualExecutionTime
-	 * @param projectId
+	 * @param productId
 	 * @param model
 	 * @return
 	 */
@@ -588,29 +610,29 @@ public class ViewController extends GenericController{
 			@RequestParam(value="name", required=false) String name,
 			@RequestParam(value="description", required=false) String description,
 			@RequestParam(value="manualExecutionTime", required=false) String manualExecutionTime,
-			@RequestParam(value="projectId", required=false) String projectId,ModelAndView model) {
+			@RequestParam(value="productId", required=false) String productId,ModelAndView model) {
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Test_View);
 		model.addObject("id", id);
 		model.addObject("name", name);
 		model.addObject("description", description);
 		model.addObject("manualExecutionTime", manualExecutionTime);
-		model.addObject("projectId", projectId);
+		model.addObject("productId", productId);
 		model.addObject("activeTab", "0");
 		Project p = new Project();
 		p.setStatus(Project.STATUS.Active);
 		ServiceResult result = recordService.searchByInstance(p, CommonDAO.OP_MODE.EQUALS);
-		List<Project> projectList;
+		List<Project> productList;
 		if (result.getResult()){
-			projectList = (List<Project>) result.getReturnObject();
+			productList = (List<Project>) result.getReturnObject();
 		} else {
-			projectList = new ArrayList<>();
+			productList = new ArrayList<>();
 		}
-		//System.out.println("projectLId:"+projectId);
-		model.addObject("projectList", projectList);
-		if (!pc.isFollowPattern(pc.UUID, projectId)){
+		//System.out.println("productLId:"+productId);
+		model.addObject("productList", productList);
+		if (!pc.isFollowPattern(pc.UUID, productId)){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Project ID is not provided or not following format.");
+			model.addObject(MESSAGE, "Product ID is not provided or not following format.");
 			return model;
 		} if (!pc.isFollowPattern(pc.UUID, id)){
 			model.addObject(RESULT, false);
@@ -627,10 +649,10 @@ public class ViewController extends GenericController{
 		}
 
 
-		Project objProject = recordService.getById(Project.class, projectId);
+		Project objProject = recordService.getById(Project.class, productId);
 		Test obj = new Test();
 
-		//check if project code is unique in DB
+		//check if product code is unique in DB
 		obj = recordService.getById(Test.class, id);
 		if (obj==null){
 			model.addObject(RESULT, false);
@@ -675,12 +697,12 @@ public class ViewController extends GenericController{
 	 * @return
 	 */
 	@RequestMapping(value = "/teamConfidence" /*, method= RequestMethod.POST*/)
-	public ModelAndView addTeamConfidence(@RequestParam(value="projectCode", required=false) String projectCode,
-								   @RequestParam(value="projectName", required=false) String projectName,
+	public ModelAndView addTeamConfidence(@RequestParam(value="productCode", required=false) String productCode,
+								   @RequestParam(value="productName", required=false) String productName,
 								   @RequestParam(value="leader", required=false) String leader,
 								   @RequestParam(value="pod", required=false) String pod,
 								   @RequestParam(value="code", required=false) String code,
-								   @RequestParam(value="projectCategory", required=false) String projectCategory,
+								   @RequestParam(value="productCategory", required=false) String productCategory,
 								   @RequestParam(value="manager", required=false) String manager,
 										  @RequestParam(value="score", required=false) String score,
 										  @RequestParam(value="description", required=false) String description,
@@ -688,17 +710,17 @@ public class ViewController extends GenericController{
 								   ModelAndView model) {
 		ParamChecker pc = new ParamChecker();
 		model.setViewName(Team_Confidence_View);
-		model.addObject("projectCode", projectCode);
-		model.addObject("projectName", projectName);
-		model.addObject("projectCategory", projectCategory);
+		model.addObject("productCode", productCode);
+		model.addObject("productName", productName);
+		model.addObject("productCategory", productCategory);
 		model.addObject("leader", leader);
 		model.addObject("manager", manager);
 		model.addObject("pod", pod);
 		model.addObject("score", score);
 		model.addObject("activeTab", "1");
-		if ((!pc.isNotEmpty(projectCode) || !pc.isNotEmpty(projectName)) && (!pc.isNotEmpty(code) && (!pc.isNotEmpty(pod) || !pc.isNotEmpty(projectCategory) || !pc.isNotEmpty(manager) || !pc.isNotEmpty(leader)))){
+		if ((!pc.isNotEmpty(productCode) || !pc.isNotEmpty(productName)) && (!pc.isNotEmpty(code) && (!pc.isNotEmpty(pod) || !pc.isNotEmpty(productCategory) || !pc.isNotEmpty(manager) || !pc.isNotEmpty(leader)))){
 			model.addObject(RESULT, false);
-			model.addObject(MESSAGE, "Please provide sufficient information to identify your POD/project. If project code/project name is provided, it will update the rating for the project. If only POD is provided, this will update the rating for the POD. If only team lead/manager is provided, this will update the rating for all projects/POD associated with the leader/manager...");
+			model.addObject(MESSAGE, "Please provide sufficient information to identify your POD/product. If product code/product name is provided, it will update the rating for the product. If only POD is provided, this will update the rating for the POD. If only team lead/manager is provided, this will update the rating for all products/POD associated with the leader/manager...");
 			return model;
 		}
 		if (!pc.isNotEmpty(score)){
@@ -723,8 +745,8 @@ public class ViewController extends GenericController{
 			//bulk update mode
 			Project ref = new Project();
 
-//			if (pc.isNotEmpty(projectCode)) {
-//				ref.setProjectCode(projectCode);
+//			if (pc.isNotEmpty(productCode)) {
+//				ref.setProjectCode(productCode);
 //			}
 			if (pc.isNotEmpty(leader)) {
 				ref.setLeader(leader);
@@ -732,25 +754,25 @@ public class ViewController extends GenericController{
 			if (pc.isNotEmpty(manager)) {
 				ref.setManager(manager);
 			}
-//			if (pc.isNotEmpty(projectName)) {
-//				ref.setProjectName(projectName);
+//			if (pc.isNotEmpty(productName)) {
+//				ref.setProjectName(productName);
 //			}
-			if (pc.isNotEmpty(projectCategory)) {
-				ref.setCategory(projectCategory);
+			if (pc.isNotEmpty(productCategory)) {
+				ref.setCategory(productCategory);
 			}
 			if (pc.isNotEmpty(pod)) {
 				ref.setPod(pod);
 			}
 
 			ServiceResult result = recordService.searchByInstance(ref, CommonDAO.OP_MODE.EQUALS);
-			List<Project> projectList = null;
+			List<Project> productList = null;
 			if (result.getResult()) {
 				//passed
-				projectList = (List<Project>) result.getReturnObject();
-				if (projectList != null && projectList.size() == 0) {
+				productList = (List<Project>) result.getReturnObject();
+				if (productList != null && productList.size() == 0) {
 					model.addObject(MESSAGE, "No result matched.");
 				}
-				for (Project cur : projectList) {
+				for (Project cur : productList) {
 					TeamConfidence c = new TeamConfidence();
 					c.setDescription(description);
 					c.setCreatedTime(new Timestamp(System.currentTimeMillis()));
@@ -761,11 +783,11 @@ public class ViewController extends GenericController{
 					AuditLog a = new AuditLog();
 					a.setNewValue(c.toString());
 					a.setCreatedBy(getIpAddr(httpRequest));
-					a.setDesc("Add a new rating for project code:" + projectCode);
+					a.setDesc("Add a new rating for product code:" + productCode);
 					recordService.save(a);
 				}
 
-				model.addObject(MESSAGE, projectList.size() + " projects have been updated.");
+				model.addObject(MESSAGE, productList.size() + " products have been updated.");
 				model.addObject(RESULT, true);
 
 			} else {
@@ -773,32 +795,32 @@ public class ViewController extends GenericController{
 				model.addObject(RESULT, false);
 
 				if (result != null && result.getMessage() != null && result.getMessage().length() > 0) {
-					model.addObject(MESSAGE, "Project list is empty. Error: " + result.getMessage());
+					model.addObject(MESSAGE, "Product list is empty. Error: " + result.getMessage());
 				} else {
-					model.addObject(MESSAGE, "Project list is empty.");
+					model.addObject(MESSAGE, "Product list is empty.");
 				}
 			}
 
 
 		} else {
-			//update single project mode
+			//update single product mode
 			Project ref = new Project();
 
-			if (pc.isNotEmpty(projectCode)) {
-				ref.setProjectCode(projectCode);
+			if (pc.isNotEmpty(productCode)) {
+				ref.setProductCode(productCode);
 			}
-			if (pc.isNotEmpty(projectName)) {
-				ref.setProjectName(projectName);
+			if (pc.isNotEmpty(productName)) {
+				ref.setProductName(productName);
 			}
-			List<Project> projectList = null;
+			List<Project> productList = null;
 			ServiceResult result = recordService.searchByInstance(ref, CommonDAO.OP_MODE.EQUALS);
 			if (result.getResult()) {
 				//passed
-				projectList = (List<Project>) result.getReturnObject();
-				if (projectList != null && projectList.size() == 0) {
+				productList = (List<Project>) result.getReturnObject();
+				if (productList != null && productList.size() == 0) {
 					model.addObject(MESSAGE, "No result matched.");
 				}
-				for (Project cur : projectList) {
+				for (Project cur : productList) {
 					TeamConfidence c = new TeamConfidence();
 					c.setDescription(description);
 					c.setCreatedTime(new Timestamp(System.currentTimeMillis()));
@@ -809,20 +831,20 @@ public class ViewController extends GenericController{
 					AuditLog a = new AuditLog();
 					a.setNewValue(c.toString());
 					a.setCreatedBy(getIpAddr(httpRequest));
-					a.setDesc("Add a new rating for project code:" + projectCode);
+					a.setDesc("Add a new rating for product code:" + productCode);
 					recordService.save(a);
 				}
 
-				model.addObject(MESSAGE, projectList.size() + " projects have been updated.");
+				model.addObject(MESSAGE, productList.size() + " products have been updated.");
 				model.addObject(RESULT, true);
 
 			} else {
 				//failed
 				model.addObject(RESULT, false);
 				if (result != null && result.getMessage() != null && result.getMessage().length() > 0) {
-					model.addObject(MESSAGE, "Project list is empty. Error: " + result.getMessage());
+					model.addObject(MESSAGE, "Product list is empty. Error: " + result.getMessage());
 				} else {
-					model.addObject(MESSAGE, "Project list is empty.");
+					model.addObject(MESSAGE, "Product list is empty.");
 				}
 			}
 

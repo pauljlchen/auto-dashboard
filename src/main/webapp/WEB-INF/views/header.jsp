@@ -11,6 +11,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<meta http-equiv="pragma" content="cache">
 	<meta http-equiv="cache-control" content="cache">
 	<meta http-equiv="expires" content="0">
@@ -26,10 +27,11 @@
 		<span>
 		<ul id="showmenu2">
 			<li><img src="<%=path%>/css/images/HSBC.jpg"/></li><li><a href="<%=path%>">Home</a></li><li>|</li>
-			<li><a href="<%=path%>/router?target=project">Product</a></li><li>|</li>
+			<li><a href="<%=path%>/router?target=product">Product</a></li><li>|</li>
 			<li><a href="<%=path%>/router?target=test">Test Case</a></li><li>|</li>
 			<li><a href="<%=path%>/router?target=team_confidence">Team Confidence</a></li><li>|</li>
 			<li><a href="<%=path%>/router?target=dashboard">Dashboard</a></li><li>|</li>
+			<li><a href="<%=path%>/router?target=events">Events</a></li><li>|</li>
 		</ul>
 	 </span>
 	 </nav>

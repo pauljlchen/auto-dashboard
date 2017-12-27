@@ -12,11 +12,10 @@ body
 	float: right;
 }
 .counter{
-	font-size:1000%;
+	font-size:300%;
 	color:white;
 	background-color: #9ACD32;
 	border-radius: 5px;
-
 	width: 100%;
 }
 
@@ -53,21 +52,23 @@ body
 	padding-right:2px;
 
 }
-
+.history_div td:nth-child(0){
+	min-width:0%;
+	max-width:0%;
+}
 .history_div td:nth-child(1){
-	min-width:8em;
-	width:10em;
-	max-width:20%;
+	min-width:0%;
+	max-width:0%;
 }
 /*SEQ*/
 .history_div td:nth-child(2){
 	min-width:5em;
-	max-width:5em;
+	max-width:20%;
 
 }
 /*Command*/
 .history_div td:nth-child(3){
-	min-width:10em;
+	min-width:5em;
 	width:2%;
 	max-width:5%;
 

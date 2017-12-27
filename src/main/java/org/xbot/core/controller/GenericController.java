@@ -11,9 +11,10 @@ import java.net.UnknownHostException;
  * Created by paulc on 2/17/2017.
  */
 public class GenericController {
-    final public String Project_View = "project";
+    final public String Project_View = "product";
     final public String Test_View = "test";
     final public String Record_View ="record";
+    final public String Events_View ="events";
     final public String Dashboard_View ="dashboard";
     final public String Team_Confidence_View ="team_confidence";
 

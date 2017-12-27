@@ -17,8 +17,8 @@ public class Project {
     public enum STATUS{Active, Inactive, ToBeDeleted}
     private String id=null;
     private STATUS status=null;
-    private String projectCode=null;
-    private String projectName=null;
+    private String productCode=null;
+    private String productName=null;
     private String manager=null;
     private String leader=null;
     private String category=null;
@@ -28,6 +28,8 @@ public class Project {
     private String testingTools=null;
     private Integer targetTestcaseNumber = null;
     private Timestamp createdTime=null;
+    private Integer phaseTestcaseNumber = null;
+    private Boolean isAllTestCaseAutomated = null;
     private Set<Test> tests = new HashSet<Test>();
     private Set<TeamConfidence> teamConfidence = new HashSet<>();
 
@@ -58,28 +60,28 @@ public class Project {
 
 
     /**
-     * test project code, user defined
+     * test product code, user defined
      */
     @Column(name = "project_code", length = 36)
-    public String getProjectCode() {
-        return projectCode;
+    public String getProductCode() {
+        return productCode;
     }
 
-    public void setProjectCode(String projectCode) {
-        this.projectCode = projectCode;
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
     }
 
     /**
-     * Project name
+     * Product name
      * @return
      */
     @Column(name = "project_name", length = 256)
-    public String getProjectName() {
-        return projectName;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
     @Column(name = "leader", length = 256)
@@ -120,7 +122,7 @@ public class Project {
     }
 
     /**
-     * The category of project
+     * The category of product
      * @return
      */
     @Column(name = "category", length = 50)
@@ -185,21 +187,43 @@ public class Project {
         this.targetTestcaseNumber = targetTestcaseNumber;
     }
 
+    @Column(name = "phase_testcase_number")
+    public Integer getPhaseTestcaseNumber() {
+        return phaseTestcaseNumber;
+    }
+
+    public void setPhaseTestcaseNumber(Integer phaseTestcaseNumber) {
+        this.phaseTestcaseNumber = phaseTestcaseNumber;
+    }
+    @Column(name = "is_all_testcase_automated")
+    public Boolean isAllTestCaseAutomated() {
+        return isAllTestCaseAutomated;
+    }
+
+    public void setAllTestCaseAutomated(Boolean allTestCaseAutomated) {
+        isAllTestCaseAutomated = allTestCaseAutomated;
+    }
+
     @Override
     public String toString() {
-        return "Project{" +
+        return "Product{" +
                 "id='" + id + '\'' +
                 ", status=" + status +
-                ", projectCode='" + projectCode + '\'' +
-                ", projectName='" + projectName + '\'' +
+                ", productCode='" + productCode + '\'' +
+                ", productName='" + productName + '\'' +
+                ", manager='" + manager + '\'' +
                 ", leader='" + leader + '\'' +
                 ", category='" + category + '\'' +
                 ", region='" + region + '\'' +
                 ", country='" + country + '\'' +
                 ", pod='" + pod + '\'' +
+                ", testingTools='" + testingTools + '\'' +
                 ", targetTestcaseNumber=" + targetTestcaseNumber +
                 ", createdTime=" + createdTime +
-
+                ", phaseTestcaseNumber=" + phaseTestcaseNumber +
+                ", isAllTestCaseAutomated=" + isAllTestCaseAutomated +
+              //  ", tests=" + tests +
+               // ", teamConfidence=" + teamConfidence +
                 '}';
     }
 }

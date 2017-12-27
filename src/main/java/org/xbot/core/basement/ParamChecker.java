@@ -33,7 +33,7 @@ public class ParamChecker {
 	public final String TIME = "(([0-1][0-9])|2[0-3]):[0-6][0-9](,(([0-1][0-9])|2[0-3]):[0-6][0-9])*";
 	public final String IMAGE_URL="(?<projectId>"+UUID+")/"+DATE+"/"+UUID+".png";
 
-	public final String COUNTRY_CODE="[A-Z]{2,2}";
+	public final String COUNTRY_CODE="[\\s\\S]{0,50}";
 
 	 //public final String STAFF_ID="[0-9]{8}";
 	//public final String STAFF_ID="[0-9]{8}"; 

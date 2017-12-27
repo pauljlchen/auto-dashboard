@@ -8,6 +8,7 @@ import java.util.List;
  * Created by paulc on 2/22/2017.
  */
 public class KPIView {
+    private String name;//the name of the KPIView
     private long manualExecutionTime;//in minutes
     private long autoExecutionTime;//in minutes
     private int testcaseNumber;
@@ -73,10 +74,19 @@ public class KPIView {
         this.successRate = successRate;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         return "KPIView{" +
-                "manualExecutionTime=" + manualExecutionTime +
+                "name='" + name + '\'' +
+                ", manualExecutionTime=" + manualExecutionTime +
                 ", autoExecutionTime=" + autoExecutionTime +
                 ", testcaseNumber=" + testcaseNumber +
                 ", successRate=" + successRate +

@@ -15,6 +15,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 <link rel="shortcut icon" href="<%=path%>/css/images/xbot_small.ico" type="image/x-icon"/>
 <script src="<%=path%>/js/jquery-2.1.4.min.js"></script>
 <script src="<%=path%>/js/jquery-ui.min.js"></script>
@@ -39,8 +40,8 @@
 			//fill the value
            	$("#updateForm").children("input[name='id']").val($(this).children("td[class='id']").html());
             $("#updateForm").children("input[name='idDisplay']").val($(this).children("td[class='id']").html());
-            $("#updateForm").children("input[name='projectId']").val($(this).children().children("input[name='projectId']").val());
-            $("#updateForm").children("input[name='projectIdDisplay']").val($.trim($(this).children("td[class='projectName']").text()));
+            $("#updateForm").children("input[name='productId']").val($(this).children().children("input[name='productId']").val());
+            $("#updateForm").children("input[name='productIdDisplay']").val($.trim($(this).children("td[class='productName']").text()));
             $("#updateForm").children("input[name='name']").val($(this).children("td[class='name']").html());
             $("#updateForm").children("textarea[name='description']").html($(this).children("td[class='description']").html());
             $("#updateForm").children("input[name='manualExecutionTime']").val($(this).children("td[class='manualExecutionTime']").html());
@@ -66,11 +67,11 @@
 			<div id="tabs-1">
 				<h2>Search Test Case</h2>
 				<form action="<%=path%>/tests/search" method="POST"  class="inputform">
-					<label>Project:</label>
-					<select name="projectId">
+					<label>Product:</label>
+					<select name="productId">
 						<option></option>
-						<c:forEach var="project" items="${projectList}">
-							<option value="${project.id}" <c:if test="${project.id == projectId}">selected</c:if>>[${project.projectCode}]${project.projectName}</option>
+						<c:forEach var="product" items="${productList}">
+							<option value="${product.id}" <c:if test="${product.id == productId}">selected</c:if>>[${product.productCode}]${product.productName}</option>
 						</c:forEach>
 					</select><br/>
 
@@ -81,12 +82,12 @@
 				</form>
 				<br/>
 				<table class="history_div">
-					<tr><th>Project</th><th>Test Case ID</th><th>Test Case Name</th><th>Description</th><th>Manual Execution Time(Minutes)</th><th>Created Time</th></tr>
+					<tr><th>Product</th><th>Test Case ID</th><th>Test Case Name</th><th>Description</th><th>Manual Execution Time(Minutes)</th><th>Created Time</th></tr>
 				<c:forEach var="item" items="${objList}">
 					<tr>
-						<td class="projectName">
-							<c:forEach var="project" items="${projectList}">
-								<c:if test="${project.id == item.project.id}">[${project.projectCode}]${project.projectName}<input type="hidden" name="projectId" value="${project.id}"/></c:if>
+						<td class="productName">
+							<c:forEach var="product" items="${productList}">
+								<c:if test="${product.id == item.project.id}">[${product.productCode}]${product.productName}<input type="hidden" name="productId" value="${product.id}"/></c:if>
 							</c:forEach>
 						</td>
 						<td class="id">${item.id}</td>
@@ -101,9 +102,9 @@
 			<div id="tabs-2">
 				<h2>Add new Test Case</h2>
 				<form id="addForm" action="<%=path%>/tests/add" method="POST"  class="inputform">
-					<label>Project:</label><select name="projectId">
-					<c:forEach var="project" items="${projectList}">
-						<option value="${project.id}" <c:if test="${project.id == projectId}">selected</c:if>>[${project.projectCode}]${project.projectName}</option>
+					<label>Product:</label><select name="productId">
+					<c:forEach var="product" items="${productList}">
+						<option value="${product.id}" <c:if test="${product.id == productId}">selected</c:if>>[${product.productCode}]${product.productName}</option>
 					</c:forEach>
 				</select><br/>
 					<label>Test Case Name:</label><input type="text" name="name" value="${name}"/><br/>
@@ -116,13 +117,13 @@
 	</main>
 	<div id="dialog1" title="Update Test" class="display: none; z-index:200;">
 		<form id="updateForm" action="<%=path%>/tests/update" method="POST"  class="inputform">
-			<label>Project:</label><input  type="text"  name="projectIdDisplay" disabled="true"/> <br/>
+			<label>Product:</label><input  type="text"  name="productIdDisplay" disabled="true"/> <br/>
 			<label>Test Case ID:</label><input type="text" name="idDisplay" disabled="true"/> <br/>
 			<label>Test Case Name:</label><input type="text" name="name" /><br/>
 			<label>Description:</label><textarea type="text" name="description"></textarea><br/>
 			<label>Manual Execution Time(Minutes):</label><input type="text" name="manualExecutionTime"/><br/>
 			<input type="submit" value="Update"/><input type="reset" value="Reset"/>
-			<input type="hidden" name="projectId"/><input type="hidden" name="id"/>
+			<input type="hidden" name="productId"/><input type="hidden" name="id"/>
 		</form>
 	</div>
 

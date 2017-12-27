@@ -82,11 +82,11 @@ public class RecordService {
 			if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getId())){
 				c.add(Restrictions.eq("p.id", obj.getProject().getId()));
 			}
-			if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getProjectCode())){
-				c.add(Restrictions.eq("p.projectCode", obj.getProject().getProjectCode()));
+			if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getProductCode())){
+				c.add(Restrictions.eq("p.productCode", obj.getProject().getProductCode()));
 			}
-			if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getProjectName())){
-				c.add(Restrictions.eq("p.projectName", obj.getProject().getProjectName()));
+			if (obj.getProject()!=null && pc.isNotEmpty(obj.getProject().getProductName())){
+				c.add(Restrictions.eq("p.productName", obj.getProject().getProductName()));
 			}
 			//search by POD
 			if (obj.getProject()!=null){
@@ -166,15 +166,17 @@ public class RecordService {
 	@Transactional(propagation = Propagation.REQUIRED)
 	public ServiceResult update(final Object obj){
 		ServiceResult result = new ServiceResult();
-		log.debug("Updating :"+obj);
+
 		try{
 			dao.update(obj);
+			log.debug("Updating :"+obj);
 			result.setResult(true);
 			result.setReturnObject(obj);
 		} catch (Exception e){
 			result.setResult(false);
 			result.setMessage("Error:"+e);
 			log.error("Error updating the object: ", e);
+			e.printStackTrace();
 		}
 		return result;
 	}
@@ -217,16 +219,115 @@ public class RecordService {
          * Count test by the reference model
          */
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-	public int[] countRecords(Timestamp startTime, Timestamp endTime){
-
+	public int[] countRecords(Record record, Timestamp startTime, Timestamp endTime){
+		//System.out.println("hello:"+record);
 		int[] result = {0,0};//0 is passed records, 1 is total executed records
 		Criteria  c = dao.getSession().createCriteria(Record.class, "r");
+		c.createAlias("r.test", "t").createAlias("r.test.project", "p");
 		c.add(Restrictions.ge("r.startTime",startTime));
 		c.add(Restrictions.le("r.startTime",endTime));
+		ParamChecker pc = new ParamChecker();
+		if (record!=null && record.getTest()!=null && record.getTest().getProject()!=null){
+			Project project = record.getTest().getProject();
+			if (pc.isFollowPattern(pc.UUID, project.getId())){
+				c.add(Restrictions.eq("p.id", project.getId()));
+			}
+			if (pc.isNotEmpty(project.getCategory())){
+				c.add(Restrictions.eq("p.category", project.getCategory()));
+			}
+			if (pc.isNotEmpty(project.getCountry())){
+				c.add(Restrictions.eq("p.country", project.getCountry()));
+			}
+			if (pc.isNotEmpty(project.getLeader())){
+				c.add(Restrictions.eq("p.leader", project.getLeader()));
+			}
+			if (pc.isNotEmpty(project.getProductCode())){
+				c.add(Restrictions.eq("p.productCode", project.getProductCode()));
+			}
+			if (pc.isNotEmpty(project.getProductName())){
+				c.add(Restrictions.eq("p.productName", project.getProductName()));
+			}
+			if (pc.isNotEmpty(project.getRegion())){
+				c.add(Restrictions.eq("p.region", project.getRegion()));
+			}
+			if (project.getStatus()!=null){
+				c.add(Restrictions.eq("p.status", project.getStatus()));
+			}
+			if (project.getTargetTestcaseNumber()!=null){
+				c.add(Restrictions.eq("p.targetTestcaseNumber", project.getTargetTestcaseNumber()));
+			}
+			if (pc.isNotEmpty(project.getPod())){
+				c.add(Restrictions.eq("p.pod", project.getPod()));
+			}
+		}
+		if (record!=null && record.getTest()!=null){
+			Test t = record.getTest();
+			if (pc.isFollowPattern(pc.UUID, t.getId())){
+				c.add(Restrictions.eq("t.id", t.getId()));
+			}
+			if (pc.isNotEmpty(t.getName())){
+				c.add(Restrictions.eq("t.name", t.getName()));
+			}
+			if (pc.isNotEmpty(t.getDescription())){
+				c.add(Restrictions.eq("t.description", t.getDescription()));
+			}
+			if (t.getManualExecutionTime()!=null){
+				c.add(Restrictions.eq("t.manualExecutionTime", t.getManualExecutionTime()));
+			}
+		}
 		c.setProjection(Projections.rowCount());
 		result[1]= ((Long) c.uniqueResult()).intValue();
 
 		c = dao.getSession().createCriteria(Record.class, "r");
+		c.createAlias("r.test", "t").createAlias("r.test.project", "p");
+		if (record!=null && record.getTest()!=null && record.getTest().getProject()!=null){
+			Project project = record.getTest().getProject();
+			if (pc.isFollowPattern(pc.UUID, project.getId())){
+				c.add(Restrictions.eq("p.id", project.getId()));
+			}
+			if (pc.isNotEmpty(project.getCategory())){
+				c.add(Restrictions.eq("p.category", project.getCategory()));
+			}
+			if (pc.isNotEmpty(project.getCountry())){
+				c.add(Restrictions.eq("p.country", project.getCountry()));
+			}
+			if (pc.isNotEmpty(project.getLeader())){
+				c.add(Restrictions.eq("p.leader", project.getLeader()));
+			}
+			if (pc.isNotEmpty(project.getProductCode())){
+				c.add(Restrictions.eq("p.productCode", project.getProductCode()));
+			}
+			if (pc.isNotEmpty(project.getProductName())){
+				c.add(Restrictions.eq("p.productName", project.getProductName()));
+			}
+			if (pc.isNotEmpty(project.getRegion())){
+				c.add(Restrictions.eq("p.region", project.getRegion()));
+			}
+			if (project.getStatus()!=null){
+				c.add(Restrictions.eq("p.status", project.getStatus()));
+			}
+			if (project.getTargetTestcaseNumber()!=null){
+				c.add(Restrictions.eq("p.targetTestcaseNumber", project.getTargetTestcaseNumber()));
+			}
+			if (pc.isNotEmpty(project.getPod())){
+				c.add(Restrictions.eq("p.pod", project.getPod()));
+			}
+		}
+		if (record!=null && record.getTest()!=null){
+			Test t = record.getTest();
+			if (pc.isFollowPattern(pc.UUID, t.getId())){
+				c.add(Restrictions.eq("t.id", t.getId()));
+			}
+			if (pc.isNotEmpty(t.getName())){
+				c.add(Restrictions.eq("t.name", t.getName()));
+			}
+			if (pc.isNotEmpty(t.getDescription())){
+				c.add(Restrictions.eq("t.description", t.getDescription()));
+			}
+			if (t.getManualExecutionTime()!=null){
+				c.add(Restrictions.eq("t.manualExecutionTime", t.getManualExecutionTime()));
+			}
+		}
 		c.add(Restrictions.ge("r.startTime",startTime));
 		c.add(Restrictions.le("r.startTime",endTime));
 		c.add(Restrictions.isNotNull("r.result"));
@@ -247,10 +348,6 @@ public class RecordService {
 
 			Criteria c = dao.getSession().createCriteria(Test.class,"t");
 			c.createAlias("t.project", "p");
-			//Criteria c = tempC2.createCriteria("Test");
-
-			//.add(Restrictions.eqProperty("r.testId","t.id"))
-			//.add(Restrictions.eqProperty("t.projectId","p.id"));
 			//for project properties
 			ParamChecker pc = new ParamChecker();
 			if (obj!=null && obj.getProject()!=null){
@@ -267,11 +364,11 @@ public class RecordService {
 				if (pc.isNotEmpty(project.getLeader())){
 					c.add(Restrictions.eq("p.leader", project.getLeader()));
 				}
-				if (pc.isNotEmpty(project.getProjectCode())){
-					c.add(Restrictions.eq("p.projectCode", project.getProjectCode()));
+				if (pc.isNotEmpty(project.getProductCode())){
+					c.add(Restrictions.eq("p.productCode", project.getProductCode()));
 				}
-				if (pc.isNotEmpty(project.getProjectName())){
-					c.add(Restrictions.eq("p.projectName", project.getProjectName()));
+				if (pc.isNotEmpty(project.getProductName())){
+					c.add(Restrictions.eq("p.productName", project.getProductName()));
 				}
 				if (pc.isNotEmpty(project.getRegion())){
 					c.add(Restrictions.eq("p.region", project.getRegion()));
@@ -391,11 +488,11 @@ public class RecordService {
 				if (pc.isNotEmpty(project.getLeader())){
 					c.add(Restrictions.eq("p.leader", project.getLeader()));
 				}
-				if (pc.isNotEmpty(project.getProjectCode())){
-					c.add(Restrictions.eq("p.projectCode", project.getProjectCode()));
+				if (pc.isNotEmpty(project.getProductCode())){
+					c.add(Restrictions.eq("p.productCode", project.getProductCode()));
 				}
-				if (pc.isNotEmpty(project.getProjectName())){
-					c.add(Restrictions.eq("p.projectName", project.getProjectName()));
+				if (pc.isNotEmpty(project.getProductName())){
+					c.add(Restrictions.eq("p.productName", project.getProductName()));
 				}
 				if (pc.isNotEmpty(project.getRegion())){
 					c.add(Restrictions.eq("p.region", project.getRegion()));
@@ -486,8 +583,8 @@ public class RecordService {
 				if (project.getTargetTestcaseNumber()!=null) {
 					c.add(Restrictions.eq("p.targetTestcaseNumber", project.getTargetTestcaseNumber()));
 				}
-				if (pc.isNotEmpty(project.getProjectCode())) {
-					c.add(Restrictions.eq("p.projectCode", project.getProjectCode()));
+				if (pc.isNotEmpty(project.getProductCode())) {
+					c.add(Restrictions.eq("p.productCode", project.getProductCode()));
 				}
 			}
 			if (pc.isFollowPattern(pc.UUID, test.getId())){

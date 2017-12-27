@@ -15,12 +15,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 <link rel="shortcut icon" href="<%=path%>/css/images/xbot_small.ico" type="image/x-icon"/>
 <script src="<%=path%>/js/jquery-2.1.4.min.js"></script>
 <script src="<%=path%>/js/jquery-ui.min.js"></script>
 
 
-<title>Project Management</title>
+<title>Product Management</title>
 
 <script type="text/javascript">
 
